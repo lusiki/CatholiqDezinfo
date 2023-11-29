@@ -128,7 +128,7 @@ politika <- dt[has_politika==T,]
 
 
 ```{r echo=F, eval=T, message=F , warning= FALSE}
-politika <- fread("C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/politika.csv") %>% select(-c(1,2))
+politika <- read.xlsx("C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/politika.xlsx") %>% select(-c(1,2))
 ```
 
 

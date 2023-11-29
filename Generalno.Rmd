@@ -53,7 +53,7 @@ source("./text_analysis.R")
 #dt = dt %>% filter(SOURCE_TYPE=="web")
 
 #dt <- fread("./catoliq.csv") %>% select(-V1)
-dt <- read_excel("C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/generalno.xlsx") 
+dt <- read.xlsx("C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/generalno.xlsx") 
 ```
 
 

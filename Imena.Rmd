@@ -115,13 +115,13 @@ for (i in 1:num_batches) {
 
 imena <- dt[has_ime==T,]
 
-write.xlsx2(imena, "C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/imena.xlsx")
+#write.xlsx2(imena, "C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/imena.xlsx")
 #write.csv2(imena, "./imena.csv")
 ```
 
 ```{r echo=F, eval=T, message=F , warning= FALSE}
+imena <- read.xlsx("C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/imena.xlsx")
 
-imena <- read_xlsx("C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/imena.xlsx")
 
 ```
 

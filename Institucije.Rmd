@@ -135,7 +135,7 @@ institucije <- dt[has_institucija==T,]
 ```{r echo=F, eval=T, message=F , warning= FALSE}
 
 
-institucije <- read_excel("C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/institucije.xlsx") 
+institucije <- read.xlsx("C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/institucije.xlsx") 
 setDT(institucije)
 
 
