@@ -7,8 +7,8 @@ __Katolicke objave__
 
 2. faza identifikacije dezinformacija među katoličkim objavama 
 
-
 Inicijalno čitanje:
+
 __Fraze__
 [overview](https://raw.githack.com/lusiki/CatholiqDezinfo/master/Fraze.html)  +  [download](https://www.dropbox.com/scl/fi/dtliiekbpyk10ac657zlc/fraze.xlsx?rlkey=ezkjt5bkw82pvx7eatofsun1f&dl=0)
 
