@@ -50,7 +50,7 @@ source("./text_analysis.R")
 ```{r echo=F, eval=F, message=F , warning= FALSE}
 
 
-dt <- read_excel("./generalno.xlsx") 
+dt <- read_excel("C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/generalno.xlsx") 
 setDT(dt)
 
 pomocno <- c( "smijenjen","konzervativci", "tradicionalisti", "pobačaj", "abortus", "aktivisti", "aktivizam", "jezuiti", "nazadan", "zaostao", "neobrazovan", "privilegije" , "privilegiran", "diskriminacija", "nacionalizam", "nacionalisti", "ekstremisti", "otpušten", "prekrštavanje", "izopćen", "izbačen", "bludničio",  "posvećenje", "inkardiniran", "inkardinacija",  "mračno doba", "razotkrio", "prijavio", "bludničio", "pronevjerio", "homofobijam", "zlodjela", "progoni", "dogma", "kontroverzni", "moderni", "svećenik", "tolerantna","vjera", "policija", "kontrola", "mediji", "mediji", "ukidanje", "homofob", "pedofil", "homoseksualnost", "patrijarhat", "čudesno", "ozdravljenje", "čudo","pedofilija", "klečavci", "kaptolaši", "popovi","lopovi", "zatucani ", "fanatici", "fašisti", "katolibani","crkvenjak", "ekstremni") %>% tolower()
@@ -122,7 +122,7 @@ fraze <- dt[has_fraze==T,]
 
 
 ```{r echo=F, eval=T, message=F , warning= FALSE}
-fraze <- fread("./fraze.csv") %>% select(-c(1,2))
+fraze <- fread("C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/fraze.csv") %>% select(-c(1,2))
 ```
 
 
