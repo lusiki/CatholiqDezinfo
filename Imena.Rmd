@@ -45,12 +45,13 @@ library(stringi)
 ```{r echo=F, eval=T, message=F , warning= FALSE, message=F}
 source("./stemmer.R")
 source("./text_analysis.R")
+source("./write_tokens.R")
 ```
 
 ```{r echo=F, eval=F, message=F , warning= FALSE}
 
 
-dt <- read_excel("./generalno.xlsx") 
+dt <- read_excel("C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/generalno.xlsx") 
 setDT(dt)
 
 imena <- c("Stepinac", "Stojić","Markić", "Ike", "Mandurić", "Košić","Bajruši", "Inoslav", "Bešker", "Tomić", "Branimir" ,"Pofuk", "Lasić", "Hrvoje", "Marjanović","Bozanić","Abramović","Pilsel") %>% tolower()
@@ -114,7 +115,7 @@ for (i in 1:num_batches) {
 
 imena <- dt[has_ime==T,]
 
-#write.xlsx2(imena, "./imena.xlsx")
+#write.xlsx2(imena, "C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/imena.xlsx")
 #write.csv2(imena, "./imena.csv")
 ```
 
