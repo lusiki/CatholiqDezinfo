@@ -116,7 +116,7 @@ for (i in 1:num_batches) {
 
 
 fraze <- dt[has_fraze==T,]
-#write.xlsx2(imena, "C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/fraze.xlsx")
+write.xlsx2(fraze, "C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/fraze.xlsx")
 #write.csv2(fraze, "./fraze.csv")
 ```
 
