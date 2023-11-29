@@ -47,6 +47,91 @@ source("./stemmer.R")
 source("./text_analysis.R")
 ```
 
+
+```{r echo=F, eval=F, message=F , warning= FALSE}
+
+
+dt <- read_excel("C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/pravno.xlsx") 
+setDT(dt)
+
+
+
+institucije  <- c("Ksaver", "HBK", "Opus Dei", "Protagora","Caritas") %>% tolower()
+institucije_root <- sapply(institucije, write_tokens)
+institucije_root <- sapply(strsplit(institucije_root, "\t"), `[`, 2)
+institucije <- enframe(institucije_root, name = "name", value = "root")
+
+
+words_vector <- str_c("\\b(", str_c(institucije$root, collapse = "|"), ")\\b")
+
+
+```
+
+
+```{r echo=F, eval=F, message=F , warning= FALSE}
+#setDT(dt)
+dt[, FULL_TEXT := tolower(FULL_TEXT)]
+# Vectorized function to check for matches
+check_matches <- function(text, words_vector) {
+  any(stri_detect_regex(text, words_vector, negate = FALSE))
+}
+
+
+batch_size <- 1000
+
+# Calculate the number of batches
+num_batches <- ceiling(nrow(dt) / batch_size)
+
+
+# Loop through each batch
+for (i in 1:num_batches) {
+  
+  start_time <- Sys.time()
+  
+  # Calculate the start and end row indices for the current batch
+  start_idx <- (i - 1) * batch_size + 1
+  end_idx <- min(i * batch_size, nrow(dt))
+  
+  # Print the current batch number and row indices
+#  cat(sprintf("Processing batch %d (rows %d to %d)...\n", i, start_idx, end_idx))
+  
+  # Subset the data table for the current batch and apply the operations
+  dt[start_idx:end_idx, `:=` (
+    has_institucija = sapply(FULL_TEXT, check_matches, words_vector),
+    matched_institucija = sapply(FULL_TEXT, function(x) paste(unlist(str_extract_all(x, words_vector)), collapse=", "))
+  )]
+  
+  batch_data <- dt[start_idx:end_idx]
+  
+  end_time <- Sys.time()
+  duration <- end_time - start_time
+  
+  # Print the duration for the current batch
+#  cat(sprintf("Batch %d processed in %f seconds.\n", i, duration))
+  
+  # ... [rest of your loop code for saving etc.] ...
+}
+
+
+institucije <- dt[has_institucija==T,]
+
+#write.xlsx2(institucije, "C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/institucije.xlsx")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ```{r echo=F, eval=T, message=F , warning= FALSE}
 
 
