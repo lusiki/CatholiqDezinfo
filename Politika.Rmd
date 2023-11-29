@@ -50,7 +50,7 @@ source("./text_analysis.R")
 ```{r echo=F, eval=F, message=F , warning= FALSE}
 
 
-dt <- read_excel("./generalno.xlsx") 
+dt <- read_excel("C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/generalno.xlsx") 
 setDT(dt)
 
 politika <- c("Hod","život", "obitelji", "prolife", "poništenje", "Rimskih", "ugovora", "sekularizacija", "sekularna","država", "klerikalizam", "Crkva", "ruši", "vlast", "veličaju" ,"ustaštvo", "oduzimaju", "prava", "ženama", "stvoriti" ,"katoličku", "državu", "afera", "zataškavanje", "Kaptola", "šutnja", "vjeronauk","školama", "vatikanski", " banka" ,"klerikalna", "vlast"," odvojena", "potiče", "homofobiju", "rodna" ,"ideologija", "klerikalizam", "ravnozemljaši", "gay" ,"brak", "podržavali", "ustaše", "naciste", "blagoslovili" ,"rat", "sekularna","Katolička", "vlada","žene") %>% tolower()
@@ -113,7 +113,15 @@ for (i in 1:num_batches) {
 
 politika <- dt[has_politika==T,]
 
-# write.xlsx2(politika, "./politika.xlsx")
+# write.xlsx2(politika, "C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/politika.xlsx")
+# 
+# 
+# library(openxlsx)
+# write.xlsx(politika, "C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/politika.xlsx")
+
+
+
+
 # 
 # write.csv2(politika, "./politika.csv")
 ```
