@@ -118,9 +118,9 @@ imena <- dt[has_ime==T,]
 #write.csv2(imena, "./imena.csv")
 ```
 
-```{r echo=F, eval=F, message=F , warning= FALSE}
+```{r echo=F, eval=T, message=F , warning= FALSE}
 
-imena <- read_xlsx("./imena.xlsx")
+imena <- read_xlsx("C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/imena.xlsx")
 
 ```
 

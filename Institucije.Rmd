@@ -50,18 +50,8 @@ source("./text_analysis.R")
 ```{r echo=F, eval=T, message=F , warning= FALSE}
 
 
-dt <- read_excel("./generalno.xlsx") 
-setDT(dt)
-
-
-
-institucije  <- c("Ksaver", "HBK", "Opus Dei", "Protagora","Caritas") %>% tolower()
-institucije_root <- sapply(institucije, write_tokens)
-institucije_root <- sapply(strsplit(institucije_root, "\t"), `[`, 2)
-institucije <- enframe(institucije_root, name = "name", value = "root")
-
-
-words_vector <- str_c("\\b(", str_c(institucije$root, collapse = "|"), ")\\b")
+institucije <- read_excel("C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/institucije.xlsx") 
+setDT(institucije)
 
 
 
@@ -69,7 +59,7 @@ words_vector <- str_c("\\b(", str_c(institucije$root, collapse = "|"), ")\\b")
 ```
 
 
-```{r echo=F, eval=T, message=F , warning= FALSE}
+```{r echo=F, eval=F, message=F , warning= FALSE}
 #setDT(dt)
 dt[, FULL_TEXT := tolower(FULL_TEXT)]
 # Vectorized function to check for matches
