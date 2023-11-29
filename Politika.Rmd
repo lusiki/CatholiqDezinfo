@@ -120,7 +120,7 @@ politika <- dt[has_politika==T,]
 
 
 ```{r echo=F, eval=T, message=F , warning= FALSE}
-politika <- fread("./politika.csv") %>% select(-c(1,2))
+politika <- fread("C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/politika.csv") %>% select(-c(1,2))
 ```
 
 

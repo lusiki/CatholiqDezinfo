@@ -121,7 +121,7 @@ pravno <- dt[has_pravno==T,]
 
 
 ```{r echo=F, eval=T, message=F , warning= FALSE}
-pravno <- read_xlsx("./pravno.xlsx")
+pravno <- read_xlsx("C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/pravno.xlsx")
 ```
 
 
