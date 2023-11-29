@@ -37,6 +37,7 @@ library(xlsx)
 library(writexl)
 library(data.table)
 library(stringi)
+library(openxlsx)
 
 
 ```
@@ -51,7 +52,7 @@ source("./write_tokens.R")
 ```{r echo=F, eval=F, message=F , warning= FALSE}
 
 
-dt <- read.xlsx("C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/generalno.xlsx") 
+dt <- read_excel("C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/generalno.xlsx") 
 setDT(dt)
 
 pomocno <- c( "smijenjen","konzervativci", "tradicionalisti", "pobačaj", "abortus", "aktivisti", "aktivizam", "jezuiti", "nazadan", "zaostao", "neobrazovan", "privilegije" , "privilegiran", "diskriminacija", "nacionalizam", "nacionalisti", "ekstremisti", "otpušten", "prekrštavanje", "izopćen", "izbačen", "bludničio",  "posvećenje", "inkardiniran", "inkardinacija",  "mračno doba", "razotkrio", "prijavio", "bludničio", "pronevjerio", "homofobijam", "zlodjela", "progoni", "dogma", "kontroverzni", "moderni", "svećenik", "tolerantna","vjera", "policija", "kontrola", "mediji", "mediji", "ukidanje", "homofob", "pedofil", "homoseksualnost", "patrijarhat", "čudesno", "ozdravljenje", "čudo","pedofilija", "klečavci", "kaptolaši", "popovi","lopovi", "zatucani ", "fanatici", "fašisti", "katolibani","crkvenjak", "ekstremni") %>% tolower()
@@ -117,7 +118,7 @@ for (i in 1:num_batches) {
 
 
 fraze <- dt[has_fraze==T,]
-write.xlsx(fraze, "C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/fraze.xlsx")
+#write.xlsx(fraze, "C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/fraze.xlsx")
 #write.csv2(fraze, "./fraze.csv")
 ```
 
