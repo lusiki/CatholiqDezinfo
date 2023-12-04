@@ -1,5 +1,15 @@
 # CatholiqDezinfo
 
+
+
+
+
+
+
+
+![Viz](photo.webp)
+
+
 1. faza identifikacije katoličkih objava na webu
 
 __Katolicke objave__(N=23,938)
