@@ -6,10 +6,8 @@ ui <- fluidPage(
   theme = shinytheme("yeti"), # Using a shinythemes theme for better aesthetics
   titlePanel("Detekcija dezinformacija katoličke tematike"),
   fluidRow(
-    column(6,
-           textAreaInput("text", "Unesite tekst objave:", rows = 10, placeholder = "Ovdje unesite tekst...")
-    ),
-    column(6,
+    column(12,
+           textAreaInput("text", "Unesite tekst objave:", rows = 10, placeholder = "Ovdje unesite tekst..."),
            actionButton("check", "Provjeri tekst", class = "btn-primary")
     )
   ),
@@ -51,18 +49,20 @@ server <- function(input, output) {
       # Formatting the results
       output$result <- renderText({
         result_text <- ""
+
         if (!is.null(results$KatoličkaTema)) {
           result_text <- paste(result_text, "Tekst objave odgovara katoličkoj tematici. Identificirane riječi su:", results$KatoličkaTema, "\n\n")
         }
 
-        result_text <- paste(result_text, "Identificirana područja katoličke tematike:\n")
+        result_text <- paste(result_text, "Identificirana područja katoličke tematike:\n\n")
+
         for (area in c("Fraze", "Pravno", "Politika", "Institucije")) {
           if (!is.null(results[[area]])) {
-            result_text <- paste(result_text, sprintf("%s: %s\n", area, results[[area]]))
+            result_text <- paste(result_text, sprintf("%s: %s\n\n", area, results[[area]]))
           }
         }
 
-        if (result_text == "Identificirana područja katoličke tematike:\n") {
+        if (trimws(result_text) == "Identificirana područja katoličke tematike:") {
           result_text <- "Nisu pronađene riječi koje upučuju na dezinformacije."
         }
 
