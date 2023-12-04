@@ -5,8 +5,6 @@ account: luxsikic
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 10710194
-bundleId: 8004764
+bundleId: 8005367
 url: https://luxsikic.shinyapps.io/application/
 version: 1
-asMultiple: FALSE
-asStatic: FALSE
