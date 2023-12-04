@@ -4,11 +4,21 @@ library(shinythemes)
 # Define UI with an improved aesthetic
 ui <- fluidPage(
   theme = shinytheme("yeti"), # Using a shinythemes theme for better aesthetics
-  titlePanel("Kritička analiza dezinformacija o vjerskim temama."),
+
+  tags$header(
+    style = "background-color: #f5f5f5; padding: 6px; text-align: center;",
+    tags$img(src = "logo.jpg", height = "50px"),
+    tags$h2("Kritička analiza dezinformacija o vjerskim temama", style = "color: #333;"),
+    tags$h4("HRVATSKO KATOLIČKO SVEUČILIŠTE", style = "color: #555;")
+  ),
+
+
+
+  titlePanel(""),
   fluidRow(
     column(12,
-           textAreaInput("text", "Unesite tekst objave:", rows = 10, placeholder = "Ovdje unesite tekst..."),
-           actionButton("check", "Provjeri tekst", class = "btn-primary")
+           textAreaInput("text", "", rows = 10, placeholder = "Ovdje unesite tekst..."),
+           actionButton("check", "Analiziraj", class = "btn-primary")
     )
   ),
   hr(), # Horizontal line for better separation of content
@@ -18,7 +28,7 @@ ui <- fluidPage(
   # Footer
   tags$footer(
     style = "position: fixed; bottom: 0; width: 100%; background-color: #f5f5f5; text-align: center; padding: 7px;",
-    "© 2023 Projekt u suradnji Hrvatskog katoličkog sveučilišta, Hrvatskog katoličkog radija i Hrvatskog društva katoličkih novinara za uspostavu sustava provjere točnosti informacija.“ | ",
+    "Built with ❤ by lux: © 2023 Projekt u suradnji HKS, HKR i HDKN za uspostavu sustava provjere točnosti informacija.“ | ",
     a(href = "https://www.unicath.hr/projekt-kriticka-analiza-dezinformacija-o-vjerskim-temama-hks-a-i-partnerskih-institucija-dobio-bespovratna-sredstva-za-uspostavu-sustava-provjere-tocnosti-informacija"," Web")
   )
 )
