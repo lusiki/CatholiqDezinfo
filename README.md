@@ -49,3 +49,30 @@ __Pravno__(N=5,870)
 identifikacijski vektor: vatikansk|ugovor|plaćanj|blagoslov|sakrament|nekretnin|imovin
 
 [overview](https://raw.githack.com/lusiki/CatholiqDezinfo/master/Pravno.html)  +  [download](https://www.dropbox.com/scl/fi/6xp1jpxkguhnl2wvvpbfp/pravno.xlsx?rlkey=zezf6w44frywwszzhwt340rfy&dl=0)
+
+
+
+
+
+
+
+Beta app dostupno na [poveznici](https://luxsikic.shinyapps.io/application/).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
