@@ -12,8 +12,8 @@ base_url <- "https://api.mediatoolkit.com/organizations/126686/groups/182718/key
 
 
 # Create a POSIXct date-time object
-datetimeA <- as.POSIXct("2022-01-05 12:00:00", tz = "UTC")
-datetimeB <- as.POSIXct("2022-01-06 12:00:00", tz = "UTC")
+datetimeA <- as.POSIXct("2023-12-20 12:00:00", tz = "UTC")
+datetimeB <- as.POSIXct("2023-12-21 12:00:00", tz = "UTC")
 
 # Format it in the desired format, including the time zone
 timestampA <- format(datetimeA, format = "%d.%m.%Y. %H:%M %Z")
@@ -24,7 +24,7 @@ access_token <- Sys.getenv("DETERM_API_KEY")
 
 from_time <- timestampA
 to_time <-  timestampB
-count <- 10000
+count <- 1000
 sort <- "time"
 type <- "all"
 offset <- 0

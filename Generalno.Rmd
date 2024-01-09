@@ -45,6 +45,7 @@ library(openxlsx)
 ```{r echo=F, eval=T, message=F , warning= FALSE, message=F}
 source("./stemmer.R")
 source("./text_analysis.R")
+source("./write_tokens.R")
 ```
 
 
