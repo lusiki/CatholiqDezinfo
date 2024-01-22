@@ -38,8 +38,8 @@ korjenuj <- function(pojavnica) {
 #input_file <- 'input_file.txt'
 #output_file <- 'output_file.txt'
 
-pravila <- lapply(strsplit(trimws(readLines('../helper_files/rules.txt')), ' '), function(x) paste0('^(', x[1], ')(', x[2], ')$'))
-transformacije <- as.data.frame(do.call(rbind, strsplit(trimws(readLines('../helper_files/transformations.txt')), '\t')))
+pravila <- lapply(strsplit(trimws(readLines('C:/Users/Lukas/Dropbox/HKS/Projekti/Dezinformacije/CatholiqDezinfo/rules.txt')), ' '), function(x) paste0('^(', x[1], ')(', x[2], ')$'))
+transformacije <- as.data.frame(do.call(rbind, strsplit(trimws(readLines('C:/Users/Lukas/Dropbox/HKS/Projekti/Dezinformacije/CatholiqDezinfo/transformations.txt')), '\t')))
 
 
 #text <- n_tokenTidy$word %>% head(1000)

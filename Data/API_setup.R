@@ -10,10 +10,10 @@ library(tidyverse)
 base_url <- "https://api.mediatoolkit.com/organizations/126686/groups/182718/keywords/6521533/mentions"
 
 
-
+# vremenska zona krivo indeksirana
 # Create a POSIXct date-time object
-datetimeA <- as.POSIXct("2023-12-20 12:00:00", tz = "UTC")
-datetimeB <- as.POSIXct("2023-12-21 12:00:00", tz = "UTC")
+datetimeA <- as.POSIXct("2022-07-27 13:00:00", tz = "UTC")
+datetimeB <- as.POSIXct("2022-07-27 14:00:00", tz = "UTC")
 
 # Format it in the desired format, including the time zone
 timestampA <- format(datetimeA, format = "%d.%m.%Y. %H:%M %Z")
@@ -24,7 +24,7 @@ access_token <- Sys.getenv("DETERM_API_KEY")
 
 from_time <- timestampA
 to_time <-  timestampB
-count <- 1000
+count <- 10000
 sort <- "time"
 type <- "all"
 offset <- 0
@@ -45,7 +45,7 @@ query_params <- list(
 
 # make a GET request to the API
 response <- GET(url = base_url, query = query_params)
-cat(content(response, 'text'), "\n")
+#cat(content(response, 'text'), "\n")
 response_list <- fromJSON(content(response, "text", encoding = "UTF-8"))
 
 
@@ -60,7 +60,7 @@ tidy_df$insert_time <- as.POSIXct(tidy_df$insert_time, origin="1970-01-01", tz="
 print(tidy_df)
 
 
-
-
+# filter 50th row
+View(tidy_df)
 
 
