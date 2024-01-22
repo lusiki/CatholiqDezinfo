@@ -8,7 +8,7 @@ library(lubridate)
 
 
 conn <- dbConnect(RMySQL::MySQL(), dbname = "determ", host = "127.0.0.1",
-                  user = "Lux", password = "Theanswer0207",, local_infile = TRUE)
+                  user = "Lux", password = "Theanswer0207", local_infile = TRUE)
 
 can_connect <- dbCanConnect(RMySQL::MySQL(), dbname = "determ", host = "127.0.0.1",
                             user = "Lux", password = "Theanswer0207")
@@ -146,7 +146,7 @@ for (df in data_list) {
 
 
 
-query <- "SELECT * FROM media_space_2021 LIMIT 1000"
+query <- "SELECT * FROM media_space_2021 LIMIT 10000"
 data <- dbGetQuery(conn, query)
 
 dbDisconnect(conn)
