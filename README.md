@@ -47,6 +47,11 @@ identifikacijski vektor: vatikansk|ugovor|plaćanj|blagoslov|sakrament|nekretnin
 [overview](https://raw.githack.com/lusiki/CatholiqDezinfo/master/Pravno.html)  +  [download](https://www.dropbox.com/scl/fi/6xp1jpxkguhnl2wvvpbfp/pravno.xlsx?rlkey=zezf6w44frywwszzhwt340rfy&dl=0)
 
 
+__Fake vijesti__(N=19)
+
+
+[download](https://www.dropbox.com/scl/fi/oic9dg3zuxtc5wf2qxhd6/fake.xlsx?rlkey=90oe9oeh9sftll98d5dzbt6gi&dl=0)
+
 3. faza filtriranja (20) najvećih portala među katoličkim  objavama
 
 
