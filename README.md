@@ -3,10 +3,6 @@
 
 
 
-
-
-
-
 ![Viz](photo.webp)
 
 
@@ -52,16 +48,12 @@ identifikacijski vektor: vatikansk|ugovor|plaćanj|blagoslov|sakrament|nekretnin
 
 
 
-
-
-
-
 Beta app dostupno na [poveznici](https://luxsikic.shinyapps.io/application/).
 
 
 
 
-
+3. faza filtriranja najvećih portala među katoličkim  objavama
 
 
 

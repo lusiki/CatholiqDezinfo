@@ -1,0 +1,160 @@
+---
+title: "Katoliq filter"
+author: "Lux"
+date: "2023-11-13"
+output: html_document
+---
+
+```{r setup, include=T, message=FALSE, warning = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+ 
+```
+
+
+```{r echo=F, eval=T, message=F , warning= FALSE, message=F}
+library(tidyverse)
+library(readxl)
+library(xlsx)
+library(here)
+library(kableExtra)
+library(DT)
+library(purrr)
+library(data.table)
+library(tidytext)
+library(dplyr)
+library(lubridate)
+library(anytime)
+library(grid)
+library(wordcloud)
+library(reshape2)
+library(ggraph)
+library(widyr)
+library(topicmodels)
+library(ggthemes)
+library(xlsx)
+library(writexl)
+library(data.table)
+library(stringi)
+library(openxlsx)
+library(writexl)
+
+```
+
+
+```{r echo=F, eval=T, message=F , warning= FALSE, message=F}
+source("./stemmer.R")
+source("./text_analysis.R")
+source("./write_tokens.R")
+```
+
+
+## Učitaj podatke
+```{r echo=F, eval=T, message=F , warning= FALSE}
+#dt <- fread("D:/LUKA/Freelance/Mediatoolkit/MktFULLtxt.csv")
+#dt = dt %>% filter(SOURCE_TYPE=="web")
+
+#dt <- fread("./catoliq.csv") %>% select(-V1)
+dt <- read.xlsx("C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/generalno.xlsx") 
+
+```
+
+
+
+```{r echo=F, eval=T, message=F , warning= FALSE}
+ 
+top20 <- dt %>%
+  group_by(FROM) %>%
+  mutate(n = n()) %>%
+  arrange(desc(n)) %>%
+  distinct(FROM, .keep_all = T) %>%
+  select(FROM, n) %>% 
+  arrange(desc(n)) %>%
+  head(20)
+
+
+```
+
+```{r echo=F, eval=F, message=F , warning= FALSE}
+
+
+# list all files in that folder
+
+list.files("C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/")
+
+
+
+demantij <- read.xlsx("C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/demantij.xlsx") 
+fraze <- read.xlsx("C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/fraze.xlsx")
+generalno <- read.xlsx("C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/generalno.xlsx")
+imena <- read.xlsx("C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/imena.xlsx")
+institucije <- read.xlsx("C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/institucije.xlsx")
+politika <- read.xlsx("C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/politika.xlsx")
+pravno <- read.xlsx("C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/pravno.xlsx")
+
+# do this for all files in the folder
+
+demantij20 <- demantij %>% filter(FROM %in% top20$FROM) 
+fraze20 <- fraze %>% filter(FROM %in% top20$FROM)
+generalno20 <- generalno %>% filter(FROM %in% top20$FROM)
+imena20 <- imena %>% filter(FROM %in% top20$FROM)
+institucije20 <- institucije %>% filter(FROM %in% top20$FROM)
+politika20 <- politika %>% filter(FROM %in% top20$FROM)
+pravno20 <- pravno %>% filter(FROM %in% top20$FROM)
+
+write.xlsx(demantij20, "C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/demantij20.xlsx")
+write.xlsx(fraze20, "C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/fraze20.xlsx")
+write.xlsx(generalno20, "C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/generalno20.xlsx")
+write.xlsx(imena20, "C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/imena20.xlsx")
+write.xlsx(institucije20, "C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/institucije20.xlsx")
+write.xlsx(politika20, "C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/politika20.xlsx")
+write.xlsx(pravno20, "C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/pravno20.xlsx")
+
+
+
+
+
+
+
+```
+
+
+```{r  echo=F, eval=T, message=F , warning= FALSE}
+
+
+# Define the base directory for easier access and modification
+base_dir <- "C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/"
+
+# List all xlsx files in the directory
+file_names <- list.files(base_dir, pattern = "\\.xlsx$", full.names = TRUE)
+
+# Predefine the list to store datasets
+datasets <- list()
+
+# Read each xlsx file and store it in the list
+for (file_path in file_names) {
+  file_name <- tools::file_path_sans_ext(basename(file_path))
+  datasets[[file_name]] <- read_xlsx(file_path)
+}
+
+# Assuming top20 is already defined somewhere in your script
+# Filter each dataset and write the filtered version back as a new file
+for (file_name in names(datasets)) {
+  # Perform the filter operation
+  filtered_data <- datasets[[file_name]] %>% filter(FROM %in% top20$FROM)
+  
+  # Construct the output file name
+  output_file_name <- paste0(file_name, "20.xlsx")
+  output_file_path <- file.path(base_dir, output_file_name)
+  
+  # Write the filtered dataset to a new xlsx file
+  write_xlsx(filtered_data, output_file_path)
+}
+
+
+```
+
+
+
+
+
