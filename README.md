@@ -47,23 +47,38 @@ identifikacijski vektor: vatikansk|ugovor|plaćanj|blagoslov|sakrament|nekretnin
 [overview](https://raw.githack.com/lusiki/CatholiqDezinfo/master/Pravno.html)  +  [download](https://www.dropbox.com/scl/fi/6xp1jpxkguhnl2wvvpbfp/pravno.xlsx?rlkey=zezf6w44frywwszzhwt340rfy&dl=0)
 
 
+3. faza filtriranja (20) najvećih portala među katoličkim  objavama
+
+
+_Katolicke objave__(N=11,008)
+[download](https://www.dropbox.com/scl/fi/jbmfkcoxmdgxqvqtf840t/generalno20.xlsx?rlkey=z17itdmlh1gnw24nfpg8pxbz6&dl=0)
+ 
+__Fraze__ (N=2,566)
+
+[download](https://www.dropbox.com/scl/fi/v4ada1fob2lvqd01lk54h/fraze20.xlsx?rlkey=2elh4yt5zhwnvynryv28rrope&dl=0)
+
+__Imena__(N=1,198)
+
+[download](https://www.dropbox.com/scl/fi/y3sb23f6unlow1ppa4b1s/imena20.xlsx?rlkey=s2iojhg7ynclu7fjwdq5p5hu8&dl=0)
+
+__Institucije__(N=141)
+
+[download](https://www.dropbox.com/scl/fi/mwmkk63mq73ui5wjg0uh8/institucije20.xlsx?rlkey=j9u7boxswsooq1mxi7pturr53&dl=0)
+
+__Politika__(N=5,746)
+
+[download](https://www.dropbox.com/scl/fi/zochadm6qj56q0ouv1ic1/politika20.xlsx?rlkey=zdeax0syhb739zm6lrq2hu9ts&dl=0)
+
+__Pravno__(N=2,544)
+
+[download](https://www.dropbox.com/scl/fi/14833qvaucoenxw2ouezh/pravno20.xlsx?rlkey=9x2sy1076bpjvd0jgsxa310l0&dl=0)
+
+
+
+
+
 
 Beta app dostupno na [poveznici](https://luxsikic.shinyapps.io/application/).
-
-
-
-
-3. faza filtriranja najvećih portala među katoličkim  objavama
-
-
-
-
-
-
-
-
-
-
 
 
 
