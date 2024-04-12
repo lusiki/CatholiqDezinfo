@@ -84,6 +84,7 @@ __Pravno__(N=2,544)
 
 
 _godina 2023__(N=32,417)
+
 [download](https://www.dropbox.com/scl/fi/ad3vac6umtd3mq4238xpv/catoliq23.xlsx?rlkey=4pvqphrciovemyc3vr9wo3pvz&dl=0)
 
 
