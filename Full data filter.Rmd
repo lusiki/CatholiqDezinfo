@@ -99,10 +99,76 @@ dta23 %>%
 dta23_filter <- dta23 %>% 
   filter(FROM_SITE %in% top20)
   
+# remove last two columns
+
+dta23_filter <- dta23_filter %>% select(-c(46,47))
+
+proba1 =
+  dta23_filter %>%
+  slice(1:100000) 
+
+proba2 =
+  dta23_filter %>%
+  slice(100001:200000)
+
+proba3 =
+  dta23_filter %>%
+  slice(200001:300000)
+proba4 =
+  dta23_filter %>%
+  slice(300001:400000)
+proba5 =
+  dta23_filter %>%
+  slice(400001:500000)
+proba6 =
+  dta23_filter %>%
+  slice(500001:600000)
+proba7 =
+  dta23_filter %>%
+  slice(600001:700000)
+proba8 = 
+  dta23_filter %>%
+  slice(700001:800000)
+
+proba9 = 
+  dta23_filter %>%
+  slice(800001:900000)
+
+proba10 = 
+  dta23_filter %>%
+  slice(900001:1000000)
+proba11 = 
+  dta23_filter %>%
+  slice(1000001:1100000)
+proba12 = 
+  dta23_filter %>%
+  slice(1100001:1200000)
+
+proba13 = 
+  dta23_filter %>%
+  slice(1200001:1300000)
 
 
-proba = dta23_filter %>%
-  slice(1:1000) 
+
+proba_list <- list()
+
+# Number of slices
+num_slices <- 13
+
+# Loop through each slice
+for (i in 1:num_slices) {
+  start <- (i - 1) * 100000 + 1
+  end <- i * 100000
+  
+  # Create each sliced data frame and add it to the list
+  proba_list[[i]] <- dta23_filter %>%
+    slice(start:end)
+}
+
+
+
+
+
   
 
 write.xlsx(pravno20, "C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/pravno20.xlsx")
@@ -118,11 +184,16 @@ write.xlsx(pravno20, "C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/In
 ```{r}
 
 
-setDT(proba)
-proba[, FULL_TEXT := tolower(FULL_TEXT)]
+setDT(proba13)
+proba13[, FULL_TEXT := tolower(FULL_TEXT)]
 
 
-generalno <- c("crkva", "biskup", "Kaptol", "časna", "sestra", "svećenik", "župnik", "vjernik", "kardinal", "papa", "sveti otac", "redovnik", "redovnica","kršćanstvo", "vjera", "Gospa", "Isus", "katolički", "misa", "pričest", "krizma", "grijeh", "vjeroučitelj", "vjeronauk", "blagoslov","svjedočanstvo", "relikvija", "stigma", "duhovnost", "velečasni","zaređenje", "krunica", "vjeronauk", "ukazanje","Stepinac","Damir Stojić", "Ike", "Mandurić","Vlado Košić","Tomić", "Pofuk", "HBK", "Opus Dei", "Protagora","Caritas","vatikanski", "ugovori", "blagoslova","sakramenata", "imovina","Hod","život", "obitelji", "prolife", "poništenje", "Rimskih", "ugovora", "sekularizacija", "sekularna","država", "klerikalizam", "Crkva", "ruši", "vlast", "veličaju" ,"ustaštvo", "oduzimaju", "prava", "katoličku", "državu", "afera", "zataškavanje", "Kaptola", "šutnja", "vjeronauk","školama", "vatikanski", " banka" ,"klerikalna", "vlast"," odvojena", "potiče", "homofobiju", "rodna" ,"ideologija", "klerikalizam", "ravnozemljaši", "gay" ,"brak", "podržavali", "ustaše", "naciste", "blagoslovili" ,"rat", "sekularna","Katolička", "vlada","žene" ,"smijenjen","konzervativci", "tradicionalisti", "pobačaj", "abortus", "aktivisti", "aktivizam", "jezuiti", "nazadan", "zaostao", "neobrazovan", "privilegije" , "privilegiran", "diskriminacija", "nacionalizam", "nacionalisti", "ekstremisti", "otpušten", "prekrštavanje", "izopćen", "izbačen", "bludničio",  "posvećenje", "inkardiniran", "inkardinacija",  "mračno doba", "razotkrio", "prijavio", "bludničio", "pronevjerio", "homofobijam", "zlodjela", "progoni", "dogma", "kontroverzni svećenik", "moderni svećenik", "tolerantna", "policija", "vjerska kontrola", "crkveni mediji", "vjerski mediji", "ukidanje", "homofob", "pedofil", "homoseksualnost", "patrijarhat", "čudesno", "ozdravljenje", "čudo") %>% tolower()
+
+
+
+
+
+generalno <- c("crkva", "biskup", "Kaptol", "časna", "sestra", "svećenik", "župnik", "vjernik", "kardinal", "papa", "sveti otac", "redovnik", "redovnica","kršćanstvo", "vjera", "Gospa", "Isus", "katolički", "misa", "pričest", "krizma", "grijeh", "vjeroučitelj", "vjeronauk", "blagoslov","svjedočanstvo", "relikvija", "stigma", "duhovnost", "velečasni","zaređenje", "krunica", "vjeronauk", "ukazanje","Stepinac","Damir Stojić", "Ike", "Mandurić","Vlado Košić","Tomić", "Pofuk", "HBK", "Opus Dei", "Protagora","Caritas","vatikanski", "blagoslova","sakramenata", "prolife", "sekularizacija", "sekularna", "klerikalizam", "Crkva", "veličaju" ,"ustaštvo", "oduzimaju", "prava", "katoličku", "državu", "afera", "Kaptola",  "vjeronauk" ,"vatikanski", "klerikalna", "rodna" ,"ideologija", "klerikalizam" ,"brak", "blagoslovili" , "sekularna","Katolička", "pobačaj", "abortus",  "jezuiti", "prekrštavanje", "izopćen", "bludničio",  "posvećenje", "inkardiniran", "inkardinacija", "dogma", "kontroverzni svećenik", "moderni svećenik", "tolerantna", "vjerska kontrola", "crkveni mediji", "vjerski mediji", "pedofil", "homoseksualnost", "patrijarhat", "ozdravljenje", "čudo") %>% tolower()
 genralno_root <- sapply(generalno, write_tokens)
 genralno_root <- sapply(strsplit(genralno_root, "\t"), `[`, 2)
 generalno <- enframe(genralno_root, name = "name", value = "root")
@@ -141,7 +212,7 @@ check_matches <- function(text, words_vector) {
 batch_size <- 1000
 
 # Calculate the number of batches
-num_batches <- ceiling(nrow(proba) / batch_size)
+num_batches <- ceiling(nrow(proba13) / batch_size)
 
 
 # Loop through each batch
@@ -151,18 +222,18 @@ for (i in 1:num_batches) {
   
   # Calculate the start and end row indices for the current batch
   start_idx <- (i - 1) * batch_size + 1
-  end_idx <- min(i * batch_size, nrow(proba))
+  end_idx <- min(i * batch_size, nrow(proba13))
   
   # Print the current batch number and row indices
   cat(sprintf("Processing batch %d (rows %d to %d)...\n", i, start_idx, end_idx))
   
   # Subset the data table for the current batch and apply the operations
-  proba[start_idx:end_idx, `:=` (
+  proba13[start_idx:end_idx, `:=` (
     has_word = sapply(FULL_TEXT, check_matches, words_vector),
     matched_word = sapply(FULL_TEXT, function(x) paste(unlist(str_extract_all(x, words_vector)), collapse=", "))
   )]
   
-  batch_data <- proba[start_idx:end_idx]
+  batch_data <- proba13[start_idx:end_idx]
   
   end_time <- Sys.time()
   duration <- end_time - start_time
@@ -174,7 +245,16 @@ for (i in 1:num_batches) {
 }
 
 
-catoliq <- proba[has_word==T,]
+catoliq23_13 <- proba13[has_word==T,]
+
+
+rbind(catoliq23_1, catoliq23_2, catoliq23_3, catoliq23_4, catoliq23_5, catoliq23_6, catoliq23_7, catoliq23_8, catoliq23_9, catoliq23_10, catoliq23_11, catoliq23_12, catoliq23_13) -> catoliq23
+
+
+
+write.xlsx(catoliq23, "C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/catoliq23.xlsx")
+
+
 
 ```
 

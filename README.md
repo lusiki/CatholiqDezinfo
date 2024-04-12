@@ -80,7 +80,11 @@ __Pravno__(N=2,544)
 
 
 
+4. faza filtriranja (25) najvećih portala među katoličkim  objavama po godinama
 
+
+_godina 2023__(N=32,417)
+[download](https://www.dropbox.com/scl/fi/ad3vac6umtd3mq4238xpv/catoliq23.xlsx?rlkey=4pvqphrciovemyc3vr9wo3pvz&dl=0)
 
 
 Beta app dostupno na [poveznici](https://luxsikic.shinyapps.io/application/).
