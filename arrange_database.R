@@ -1,13 +1,13 @@
 library("DBI")
 library("RMySQL")
 library("readxl")
-library(readxl)
-library(DBI)
-library(lubridate)
+library("readxl")
+library("DBI")
+library("lubridate")
 
 
 
-conn <- dbConnect(RMySQL::MySQL(), dbname = "determ", host = "127.0.0.1",
+conn <- dbConnect(RMySQL::MySQL(), dbname = "determ_all", host = "127.0.0.1",
                   user = "Lux", password = "Theanswer0207", local_infile = TRUE)
 
 can_connect <- dbCanConnect(RMySQL::MySQL(), dbname = "determ", host = "127.0.0.1",
@@ -66,7 +66,7 @@ CREATE TABLE media_space_2021 (
 
 ### arrange data ----
 
-file_list <- list.files(path = "C:/Users/lukas/Dropbox/Determ_mediaspace/2021", pattern = "*.xlsx", full.names = TRUE)
+file_list <- list.files(path = "C:/Users/lukas/Dropbox/Determ_mediaspace/2023", pattern = "*.xlsx", full.names = TRUE)
 
 
 # Function to extract and parse the first date in the filename
@@ -107,7 +107,7 @@ for (file_path in sorted_files) {
   # Write the data frame to the database
   # Using tryCatch to handle potential errors for individual files
   tryCatch({
-    dbWriteTable(conn, "media_space_2021", df, append = TRUE, row.names = FALSE)
+    dbWriteTable(conn, "media_space_2023", df, append = TRUE, row.names = FALSE)
   }, error = function(e) {
     message("Error with file: ", file_path)
     message("Error message: ", e$message)
@@ -146,7 +146,7 @@ for (df in data_list) {
 
 
 
-query <- "SELECT * FROM media_space_2021 LIMIT 10000"
+query <- "SELECT * FROM media_space_2021"
 data <- dbGetQuery(conn, query)
 
 dbDisconnect(conn)

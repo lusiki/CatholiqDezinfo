@@ -1,0 +1,215 @@
+---
+title: "Full data filter"
+author: "Lux"
+date: "2023-11-13"
+output: html_document
+---
+
+```{r setup, include=T, message=FALSE, warning = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+ 
+```
+
+
+```{r echo=F, eval=T, message=F , warning= FALSE, message=F}
+library(tidyverse)
+library(readxl)
+library(xlsx)
+library(here)
+library(kableExtra)
+library(DT)
+library(purrr)
+library(tidytext)
+library(dplyr)
+library(lubridate)
+library(anytime)
+library(grid)
+library(wordcloud)
+library(reshape2)
+library(ggraph)
+library(widyr)
+library(topicmodels)
+library(ggthemes)
+library(xlsx)
+library(writexl)
+library(data.table)
+library(stringi)
+library(openxlsx)
+library(writexl)
+library(RMySQL)
+```
+
+
+```{r echo=F, eval=T, message=F , warning= FALSE, message=F}
+source("./stemmer.R")
+source("./text_analysis.R")
+source("./write_tokens.R")
+```
+
+
+## Učitaj podatke
+```{r echo=F, eval=T, message=F , warning= FALSE}
+conn <- dbConnect(RMySQL::MySQL(), dbname = "determ_all", host = "127.0.0.1",
+                  user = "Lux", password = "Theanswer0207", local_infile = TRUE)
+
+query <- "SELECT * FROM media_space_2023"
+data22 <- dbGetQuery(conn, query)
+
+#fwrite(data22, "C:/Users/lukas/Desktop/dta22.xlsx")
+```
+
+```{r}
+dta23 <- fread("C:/Users/lukas/Desktop/dta23.xlsx")
+dta22 <- fread("C:/Users/lukas/Desktop/dta22.xlsx")
+
+```
+
+
+```{r echo=F, eval=T, message=F , warning= FALSE}
+
+
+range(data23$DATE)
+
+ 
+#filter only web from column FROM and make a count number of rows per 
+
+data
+
+dta23 %>%
+  filter(SOURCE_TYPE == "web") %>%
+  group_by(FROM_SITE) %>%
+  summarise(Count = n()) %>%
+  arrange(desc(Count)) %>%
+  mutate(Percentage = (Count / sum(Count)) * 100, # Calculate percentage
+         Cumulative_Percentage = cumsum(Percentage)) %>% # Calculate cumulative percentage
+  head(25) %>%
+  pull(FROM_SITE) -> top20
+
+
+```
+
+```{r echo=F, eval=F, message=F , warning= FALSE}
+
+
+
+
+# do this for all files in the folder
+
+dta23_filter <- dta23 %>% 
+  filter(FROM_SITE %in% top20)
+  
+
+
+proba = dta23_filter %>%
+  slice(1:1000) 
+  
+
+write.xlsx(pravno20, "C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/pravno20.xlsx")
+
+
+
+```
+
+
+
+
+
+```{r}
+
+
+setDT(proba)
+proba[, FULL_TEXT := tolower(FULL_TEXT)]
+
+
+generalno <- c("crkva", "biskup", "Kaptol", "časna", "sestra", "svećenik", "župnik", "vjernik", "kardinal", "papa", "sveti otac", "redovnik", "redovnica","kršćanstvo", "vjera", "Gospa", "Isus", "katolički", "misa", "pričest", "krizma", "grijeh", "vjeroučitelj", "vjeronauk", "blagoslov","svjedočanstvo", "relikvija", "stigma", "duhovnost", "velečasni","zaređenje", "krunica", "vjeronauk", "ukazanje","Stepinac","Damir Stojić", "Ike", "Mandurić","Vlado Košić","Tomić", "Pofuk", "HBK", "Opus Dei", "Protagora","Caritas","vatikanski", "ugovori", "blagoslova","sakramenata", "imovina","Hod","život", "obitelji", "prolife", "poništenje", "Rimskih", "ugovora", "sekularizacija", "sekularna","država", "klerikalizam", "Crkva", "ruši", "vlast", "veličaju" ,"ustaštvo", "oduzimaju", "prava", "katoličku", "državu", "afera", "zataškavanje", "Kaptola", "šutnja", "vjeronauk","školama", "vatikanski", " banka" ,"klerikalna", "vlast"," odvojena", "potiče", "homofobiju", "rodna" ,"ideologija", "klerikalizam", "ravnozemljaši", "gay" ,"brak", "podržavali", "ustaše", "naciste", "blagoslovili" ,"rat", "sekularna","Katolička", "vlada","žene" ,"smijenjen","konzervativci", "tradicionalisti", "pobačaj", "abortus", "aktivisti", "aktivizam", "jezuiti", "nazadan", "zaostao", "neobrazovan", "privilegije" , "privilegiran", "diskriminacija", "nacionalizam", "nacionalisti", "ekstremisti", "otpušten", "prekrštavanje", "izopćen", "izbačen", "bludničio",  "posvećenje", "inkardiniran", "inkardinacija",  "mračno doba", "razotkrio", "prijavio", "bludničio", "pronevjerio", "homofobijam", "zlodjela", "progoni", "dogma", "kontroverzni svećenik", "moderni svećenik", "tolerantna", "policija", "vjerska kontrola", "crkveni mediji", "vjerski mediji", "ukidanje", "homofob", "pedofil", "homoseksualnost", "patrijarhat", "čudesno", "ozdravljenje", "čudo") %>% tolower()
+genralno_root <- sapply(generalno, write_tokens)
+genralno_root <- sapply(strsplit(genralno_root, "\t"), `[`, 2)
+generalno <- enframe(genralno_root, name = "name", value = "root")
+
+
+words_vector <- str_c("(", str_c(generalno$root, collapse = "|"), ")")
+words_vector <- str_c("\\b(", str_c(generalno$root, collapse = "|"), ")\\b")
+
+
+# Vectorized function to check for matches
+check_matches <- function(text, words_vector) {
+  any(stri_detect_regex(text, words_vector, negate = FALSE))
+}
+
+
+batch_size <- 1000
+
+# Calculate the number of batches
+num_batches <- ceiling(nrow(proba) / batch_size)
+
+
+# Loop through each batch
+for (i in 1:num_batches) {
+  
+  start_time <- Sys.time()
+  
+  # Calculate the start and end row indices for the current batch
+  start_idx <- (i - 1) * batch_size + 1
+  end_idx <- min(i * batch_size, nrow(proba))
+  
+  # Print the current batch number and row indices
+  cat(sprintf("Processing batch %d (rows %d to %d)...\n", i, start_idx, end_idx))
+  
+  # Subset the data table for the current batch and apply the operations
+  proba[start_idx:end_idx, `:=` (
+    has_word = sapply(FULL_TEXT, check_matches, words_vector),
+    matched_word = sapply(FULL_TEXT, function(x) paste(unlist(str_extract_all(x, words_vector)), collapse=", "))
+  )]
+  
+  batch_data <- proba[start_idx:end_idx]
+  
+  end_time <- Sys.time()
+  duration <- end_time - start_time
+  
+  # Print the duration for the current batch
+  cat(sprintf("Batch %d processed in %f seconds.\n", i, duration))
+  
+  # ... [rest of your loop code for saving etc.] ...
+}
+
+
+catoliq <- proba[has_word==T,]
+
+```
+
+```{r  echo=F, eval=T, message=F , warning= FALSE}
+
+
+# Define the base directory for easier access and modification
+base_dir <- "C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/"
+
+# List all xlsx files in the directory
+file_names <- list.files(base_dir, pattern = "\\.xlsx$", full.names = TRUE)
+
+# Predefine the list to store datasets
+datasets <- list()
+
+# Read each xlsx file and store it in the list
+for (file_path in file_names) {
+  file_name <- tools::file_path_sans_ext(basename(file_path))
+  datasets[[file_name]] <- read_xlsx(file_path)
+}
+
+# Assuming top20 is already defined somewhere in your script
+# Filter each dataset and write the filtered version back as a new file
+for (file_name in names(datasets)) {
+  # Perform the filter operation
+  filtered_data <- datasets[[file_name]] %>% filter(FROM %in% top20$FROM)
+  
+  # Construct the output file name
+  output_file_name <- paste0(file_name, "20.xlsx")
+  output_file_path <- file.path(base_dir, output_file_name)
+  
+  # Write the filtered dataset to a new xlsx file
+  write_xlsx(filtered_data, output_file_path)
+}
+
+
+```
+
