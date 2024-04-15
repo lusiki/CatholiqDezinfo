@@ -76,7 +76,7 @@ range(data23$DATE)
 
 data
 
-dta23 %>%
+dta22 %>%
   filter(SOURCE_TYPE == "web") %>%
   group_by(FROM_SITE) %>%
   summarise(Count = n()) %>%
@@ -96,7 +96,7 @@ dta23 %>%
 
 # do this for all files in the folder
 
-dta23_filter <- dta23 %>% 
+dta22_filter <- dta22 %>% 
   filter(FROM_SITE %in% top20)
   
 # remove last two columns
@@ -184,8 +184,8 @@ write.xlsx(pravno20, "C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/In
 ```{r}
 
 
-setDT(proba13)
-proba13[, FULL_TEXT := tolower(FULL_TEXT)]
+setDT(dta22_filter)
+dta22_filter[, FULL_TEXT := tolower(FULL_TEXT)]
 
 
 
@@ -212,7 +212,7 @@ check_matches <- function(text, words_vector) {
 batch_size <- 1000
 
 # Calculate the number of batches
-num_batches <- ceiling(nrow(proba13) / batch_size)
+num_batches <- ceiling(nrow(dta22_filter) / batch_size)
 
 
 # Loop through each batch
@@ -222,18 +222,18 @@ for (i in 1:num_batches) {
   
   # Calculate the start and end row indices for the current batch
   start_idx <- (i - 1) * batch_size + 1
-  end_idx <- min(i * batch_size, nrow(proba13))
+  end_idx <- min(i * batch_size, nrow(dta22_filter))
   
   # Print the current batch number and row indices
   cat(sprintf("Processing batch %d (rows %d to %d)...\n", i, start_idx, end_idx))
   
   # Subset the data table for the current batch and apply the operations
-  proba13[start_idx:end_idx, `:=` (
+  dta22_filter[start_idx:end_idx, `:=` (
     has_word = sapply(FULL_TEXT, check_matches, words_vector),
     matched_word = sapply(FULL_TEXT, function(x) paste(unlist(str_extract_all(x, words_vector)), collapse=", "))
   )]
   
-  batch_data <- proba13[start_idx:end_idx]
+  batch_data <- dta22_filter[start_idx:end_idx]
   
   end_time <- Sys.time()
   duration <- end_time - start_time
@@ -245,7 +245,7 @@ for (i in 1:num_batches) {
 }
 
 
-catoliq23_13 <- proba13[has_word==T,]
+catoliq22 <- dta22_filter[has_word==T,]
 
 
 rbind(catoliq23_1, catoliq23_2, catoliq23_3, catoliq23_4, catoliq23_5, catoliq23_6, catoliq23_7, catoliq23_8, catoliq23_9, catoliq23_10, catoliq23_11, catoliq23_12, catoliq23_13) -> catoliq23
