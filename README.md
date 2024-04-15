@@ -87,7 +87,7 @@ __godina 2023__(N=32,417)
 
 [download](https://www.dropbox.com/scl/fi/ad3vac6umtd3mq4238xpv/catoliq23.xlsx?rlkey=4pvqphrciovemyc3vr9wo3pvz&dl=0)
 
-__godina 2023__(N=20,103)
+__godina 2022__(N=20,103)
 
 [download](https://www.dropbox.com/s/5castg5lpdrkkui/catoliq22.xlsx?dl=0)
 
