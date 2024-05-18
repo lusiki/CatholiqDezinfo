@@ -252,7 +252,7 @@ rbind(catoliq23_1, catoliq23_2, catoliq23_3, catoliq23_4, catoliq23_5, catoliq23
 
 
 
-write.xlsx(catoliq23, "C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/catoliq23.xlsx")
+write.xlsx(catoliq22, "C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/catoliq22.xlsx")
 
 
 
