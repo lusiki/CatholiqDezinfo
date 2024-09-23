@@ -1,0 +1,97 @@
+---
+title: "Katoliq korpus"
+author: "Lux"
+date: "2023-11-13"
+output: html_document
+---
+
+```{r setup, include=T, message=FALSE, warning = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+
+```
+
+
+```{r echo=F, eval=T, message=F , warning= FALSE, message=F}
+library(tidyverse)
+library(readxl)
+library(xlsx)
+library(here)
+library(kableExtra)
+library(DT)
+library(purrr)
+library(data.table)
+library(tidytext)
+library(dplyr)
+library(lubridate)
+library(anytime)
+library(grid)
+library(wordcloud)
+library(reshape2)
+library(ggraph)
+library(widyr)
+library(topicmodels)
+library(ggthemes)
+library(xlsx)
+library(writexl)
+library(data.table)
+library(stringi)
+library(readxl)
+library(writexl)
+```
+
+
+```{r echo=F, eval=F, message=F , warning= FALSE, message=F}
+source("./stemmer.R")
+source("./text_analysis.R")
+```
+
+
+```{r}
+# Read all .xlsx files from the first folder
+folder_path <- "C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje"
+file_list <- list.files(path = folder_path, pattern = "*.xlsx", full.names = TRUE)
+
+# Read each file into a list
+data_list <- lapply(file_list, read_excel)
+
+# Find common columns across all dataframes
+common_columns <- Reduce(intersect, lapply(data_list, colnames))
+
+# Bind only the common columns together
+data_combined <- lapply(data_list, function(df) df[ , common_columns, drop = FALSE]) %>% bind_rows()
+
+# Read the second Excel file
+second_file_path <- "C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Dezinformacijski članci/URL_all.xlsx"
+data_second <- read_excel(second_file_path)
+
+# Filter rows in the first dataframe based on URLs in the second dataframe
+filtered_data <- data_combined %>% filter(URL %in% data_second$URL)
+
+# Keep only unique rows based on the URL column in the filtered data
+filtered_data_unique <- filtered_data %>% distinct(URL, .keep_all = TRUE)
+
+# View the unique filtered data
+head(filtered_data_unique)
+
+
+
+```
+
+
+
+```{r}
+
+# Define the file path for the output file
+output_file_path <- "C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Dezinformacijski članci/ZBIRNO_LAST.xlsx"
+
+# Write the filtered unique data to an Excel file
+write_xlsx(filtered_data_unique, output_file_path)
+```
+
+
+
+
+
+
+
