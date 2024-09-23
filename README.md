@@ -92,6 +92,11 @@ __godina 2022__(N=20,103)
 [download](https://www.dropbox.com/s/5castg5lpdrkkui/catoliq22.xlsx?dl=0)
 
 
+5. sve tekuće dezinformacije
+
+__Katolicke dezinfo objave__(N=177)
+[download](https://www.dropbox.com/scl/fi/r2cyedzpyq7lzrov07wdg/ZBIRNO_LAST.xlsx?rlkey=09e9a68kjffh80g5e2m9zpjyz&dl=0)
+
 
 Beta app dostupno na [poveznici](https://luxsikic.shinyapps.io/application/).
 
