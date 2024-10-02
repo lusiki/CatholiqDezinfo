@@ -84,12 +84,12 @@ server <- function(input, output, session) {
   library(stopwords)
 
   # Source the stemming functions (ensure these files are in the app directory)
-  source("C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/CatholiqDezinfo/Application/Source/stemmer.R")       # This should define the write_tokens function
-  source("C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/CatholiqDezinfo/Application/Source/text_analysis.R") # If required by stemmer.R
+  source("./stemmer.R")       # This should define the write_tokens function
+  source("./text_analysis.R") # If required by stemmer.R
 
   # Read the precomputed TF-IDF data
   # Adjust the path to your Excel file
-  tf_idf_corpus <- read_excel("C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/CatholiqDezinfo/Application/Source/output_tf_idf.xlsx")
+  tf_idf_corpus <- read_excel("./Data/output_tf_idf.xlsx")
   # Ensure the data has the necessary columns
   # Assuming tf_idf_corpus has columns: document_id, word, tf_idf, idf
 

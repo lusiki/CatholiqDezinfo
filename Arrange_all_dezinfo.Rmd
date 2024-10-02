@@ -60,10 +60,13 @@ common_columns <- Reduce(intersect, lapply(data_list, colnames))
 
 # Bind only the common columns together
 data_combined <- lapply(data_list, function(df) df[ , common_columns, drop = FALSE]) %>% bind_rows()
+data_combined <- data_combined %>% distinct(URL, .keep_all = TRUE)
+
 
 # Read the second Excel file
 second_file_path <- "C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Dezinformacijski članci/URL_all.xlsx"
 data_second <- read_excel(second_file_path)
+data_second <- data_second %>% distinct(URL, .keep_all = TRUE)
 
 # Filter rows in the first dataframe based on URLs in the second dataframe
 filtered_data <- data_combined %>% filter(URL %in% data_second$URL)

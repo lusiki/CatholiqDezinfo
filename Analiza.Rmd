@@ -51,6 +51,8 @@ source("./text_analysis.R")
 ```{r echo=F, eval=T, message=F , warning= FALSE}
 #all <- fread("D:/LUKA/Freelance/Mediatoolkit/MktFULLtxt.csv")
 dt <- read_excel("C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Dezinformacijski članci/ZBIRNO_LAST.xlsx") 
+# add a row id
+dt <- dt %>% mutate(row_id = row_number())
 ```
 
 
@@ -108,7 +110,6 @@ summ <- daily_counts %>%
 summ
 ```
 
-
 #### Broj objava po danima  
 ```{r echo=F, eval=T, message=F , warning= FALSE}
 # create bar chart  of articles over time
@@ -129,6 +130,14 @@ ggplot(daily_counts, aes(x = DATE, y = count)) +
 
 #### Broj objava po portalima
 ```{r echo=F, eval=F, message=F , warning= FALSE}
+
+
+dt <- dt %>% mutate(FROM = gsub("^(.*?)\\.hr.*", "\\1", URL))
+dt <- dt %>% mutate(FROM = gsub("http://", "", FROM))
+dt <- dt %>% mutate(FROM = gsub("https://www.", "", FROM))
+dt <- dt %>% mutate(FROM = gsub("https://", "", FROM))
+dt <- dt %>% mutate(FROM = gsub("www.", "", FROM))
+
 # Portals by activity
 activity <- dt %>%
   group_by(FROM) %>%
@@ -138,11 +147,10 @@ activity <- dt %>%
 
 datatable(activity, options = list(scrollX = TRUE, scrollY = "500px"))
 
-
 ```
 
 
-#### Najčešće riječi
+#### Najčešće riječi u naslovima
 ```{r echo=F, eval=T, message=F , warning= FALSE}
 
 # tokenize
@@ -169,8 +177,6 @@ n_tokenTidy %>%
   datatable(., options = list(scrollX = TRUE, scrollY = "500px"))
 
 ```
-
-
 
 
 
@@ -240,34 +246,20 @@ head(n_tokenTidy_processed)
 ```
 
 
+#### Najčešće riječi u naslovima (korijen)
+```{r cho=F, eval=T, message=F , warning= FALSE}
 
-
-#### Najčešće riječi i.e. korijen (problematično)
-```{r echo=F, eval=F, message=F , warning= FALSE}
-
-
-n_tokenTidy[, word := tolower(word)]
-
-# Assuming 'write_tokens' is a function that can be vectorized
-n_tokenTidy[, generalno_root := sapply(word, write_tokens)]
-
-# Split the strings and extract the second element
-n_tokenTidy[, generalno_root := sapply(strsplit(generalno_root, "\t"), `[`, 2)]
-
-# Optionally, if you want to create a new data.table like the enframe step
-generalno_dt <- data.table(name = n_tokenTidy$word, root = n_tokenTidy$word_root)
-
-
+# Do the same as above but keep the respective word to generalno_root
 
 n_tokenTidy_processed %>%
-  group_by(word) %>%
-  summarise(N = n()) %>%
+  group_by(generalno_root) %>%
+  summarise(N = n(), word_list = paste(unique(word), collapse = ", ")) %>%
   arrange(desc(N)) %>%
-  filter(N > 100) %>%
+  filter(N > 1) %>%
   datatable(., options = list(scrollX = TRUE, scrollY = "500px"))
 
-```
 
+```
 
 
 
@@ -325,37 +317,15 @@ proba <- readRDS("D:/LUKA/Freelance/Mediatoolkit/native_token_stemm.rds")
 
 
 
-```{r}
-korijen_counts <- n_tokenTidy_processed %>%
-  group_by(generalno_root) %>%
-  summarise(
-    respective_words = paste(unique(word), collapse = ", "),
-    count = n()
-  ) %>%
-  arrange(desc(count)) 
-
-
-
-korijen_counts %>%
-  datatable(., options = list(scrollX = TRUE, scrollY = "500px"))
-```
-
-
-
-
-
-
-#### Najčešće riječi po portalima
+#### Najčešće riječi u naslovima po portalima
 ```{r echo=F, eval=F, message=F , warning= FALSE, fig.height=20, fig.width=20}
 
 
 setDT(n_tokenTidy)
-
-an_tokenTidy <- n_tokenTidy[, .(N = .N), by = .(word, FROM)][order(-N)][N > 1]
-
+an_tokenTidy <- n_tokenTidy[, .(N = .N), by = .(generalno_root, FROM)][order(-N)][N > 1]
 
 
-ggplot(an_tokenTidy, aes(reorder(word, N), N, fill = FROM)) +
+ggplot(an_tokenTidy, aes(reorder(generalno_root, N), N, fill = FROM)) +
    geom_col(show.legend = FALSE) +
    ggtitle( "") +
    labs( x = "Riječ", y = "Number of words") +
@@ -366,33 +336,203 @@ ggplot(an_tokenTidy, aes(reorder(word, N), N, fill = FROM)) +
 
 ```
 
+#### Najčešće riječi u tekstu
+```{r echo=F, eval=T, message=F , warning= FALSE}
 
-#### Najčešće riječi i.e. korijen (problematično)
-```{r echo=F, eval=F, message=F , warning= FALSE}
+# tokenize
+dt %>% 
+  unnest_tokens(word, FULL_TEXT) -> n_token
 
+# remove stop words, numbers, single letters
+n_token %>% 
+  anti_join(stop_corpus, by = "word") %>%
+  mutate(word = gsub("\\d+", NA, word)) %>%
+  mutate(word = gsub("^[a-zA-Z]$", NA, word)) -> n_tokenTidy
+# remove NA
+n_tokenTidy %>%
+  filter(!is.na(word)) -> n_tokenTidy
 
-
-n_tokenTidy[, word := tolower(word)]
-
-# Assuming 'write_tokens' is a function that can be vectorized
-n_tokenTidy[, generalno_root := sapply(word, write_tokens)]
-
-# Split the strings and extract the second element
-n_tokenTidy[, generalno_root := sapply(strsplit(generalno_root, "\t"), `[`, 2)]
-
-# Optionally, if you want to create a new data.table like the enframe step
-generalno_dt <- data.table(name = n_tokenTidy$word, root = n_tokenTidy$word_root)
-
+setDT(n_tokenTidy)
 
 
 n_tokenTidy %>%
   group_by(word) %>%
   summarise(N = n()) %>%
   arrange(desc(N)) %>%
-  filter(N > 100) %>%
+  filter(N > 1) %>%
   datatable(., options = list(scrollX = TRUE, scrollY = "500px"))
 
 ```
+
+#### Najčešće riječi u tekstu (korijen)
+
+```{r echo=F, eval=T, message=F , warning= FALSE}
+
+# Assuming n_tokenTidy is a data.table
+# Set up batch size (tune this based on your system's memory/capacity)
+batch_size <- 10000  # Example batch size
+total_rows <- nrow(n_tokenTidy)
+num_batches <- ceiling(total_rows / batch_size)
+
+# Function to process each batch
+process_batch <- function(batch_data, batch_number) {
+  # Convert words to lowercase
+  batch_data[, word := tolower(word)]
+  
+  # Apply the write_tokens function in a vectorized way
+  batch_data[, generalno_root := sapply(word, write_tokens)]
+  
+  # Split the strings and extract the second element
+  batch_data[, generalno_root := sapply(strsplit(generalno_root, "\t"), `[`, 2)]
+  
+  return(batch_data)
+}
+
+# Create a list of data batches
+data_batches <- split(n_tokenTidy, ceiling(seq_len(total_rows) / batch_size))
+
+# Initialize an empty list to store results
+results_list <- list()
+
+# Initialize start time for the entire process
+start_time <- Sys.time()
+
+# Process each batch sequentially with time tracking and progress
+for (i in seq_along(data_batches)) {
+  # Record the start time of the batch
+  batch_start_time <- Sys.time()
+  
+  # Process the current batch
+  results_list[[i]] <- process_batch(data_batches[[i]], i)
+  
+  # Calculate the time taken to process the batch
+  batch_end_time <- Sys.time()
+  batch_time <- batch_end_time - batch_start_time
+  
+  # Calculate total elapsed time and estimated time remaining
+  elapsed_time <- batch_end_time - start_time
+  avg_batch_time <- elapsed_time / i  # Average time per batch
+  remaining_batches <- num_batches - i
+  estimated_time_remaining <- avg_batch_time * remaining_batches
+  
+  # Print progress and time information
+  cat(sprintf("Processed batch %d of %d\n", i, num_batches))
+  cat(sprintf("Time taken for this batch: %s seconds\n", round(batch_time, 2)))
+  cat(sprintf("Estimated time remaining: %s seconds\n\n", round(estimated_time_remaining, 2)))
+}
+
+# Combine results back into a single data.table
+n_tokenTidy_processed <- rbindlist(results_list)
+
+# View the result
+head(n_tokenTidy_processed)
+
+
+
+
+```
+
+
+
+#### Najčešće riječi u tekstu (korijen)
+
+```{r cho=F, eval=T, message=F , warning= FALSE}
+
+
+# Do the same as above but keep the respective word to generalno_root
+
+n_tokenTidy_processed %>%
+  group_by(generalno_root) %>%
+  summarise(N = n(), word_list = paste(unique(word), collapse = ", ")) %>%
+  arrange(desc(N)) %>%
+  filter(N > 1) %>%
+  datatable(., options = list(scrollX = TRUE, scrollY = "500px"))
+
+
+
+
+
+```
+
+
+
+
+
+#### TF-IDF
+
+```{r}
+n_tokenTidy_processed %>%
+  mutate(title = as.character(TITLE)) %>%  # Ensure the title is a character vector
+  mutate(row_id = dense_rank(title)) -> n_tokenTidy_processed
+
+
+term_freq <- n_tokenTidy_processed %>%
+  count(row_id, generalno_root, sort = TRUE)  # count occurrences of each word by document (FROM)
+
+# Calculate TF-IDF using the tidytext package
+tf_idf_data <- term_freq %>%
+  bind_tf_idf(generalno_root, row_id, n)  # Calculate TF-IDF
+
+# Sort by descending TF-IDF
+tf_idf_data_sorted <- tf_idf_data %>%
+  arrange(desc(n))
+
+write_xlsx(tf_idf_data, "C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/CatholiqDezinfo/Data/output_tf_idf.xlsx")
+
+
+
+
+
+# Convert to data.table for further manipulation (if needed)
+setDT(tf_idf_data_sorted)
+
+# View or inspect the result
+datatable(tf_idf_data_sorted, options = list(scrollX = TRUE, scrollY = "500px"))
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #### Sentiment
 ```{r echo=F, eval=T, message=F , warning= FALSE}
@@ -493,6 +633,7 @@ dataset %>%
  gg_doprinos_sentimentu
  
 }
+
 
 doprinos_sentimentu(n_tokenTidy,20)
 ```
