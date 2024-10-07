@@ -10,6 +10,7 @@ library(stringr)
 library(tm)
 library(Matrix)
 library(stopwords)
+library(data.table)
 
 # Define UI
 ui <- fluidPage(
@@ -26,6 +27,9 @@ ui <- fluidPage(
       .btn-primary { background-color: #337ab7; border-color: #2e6da4; }
       .btn-primary:hover { background-color: #286090; border-color: #204d74; }
       .spinner-border { color: #337ab7; }
+      .progress-bar { background-color: #337ab7; }
+      .analysis-text { font-size: 16px; }
+      .analysis-word { color: #d9534f; font-weight: bold; }
     "))
   ),
 
@@ -43,7 +47,7 @@ ui <- fluidPage(
                column(12,
                       h3("Unesite tekst za analizu"),
                       textAreaInput("text", label = NULL, rows = 10, placeholder = "Ovdje unesite tekst..."),
-                      actionButton("check", "Analiziraj", class = "btn btn-primary mt-2"),
+                      actionButton("check", "Provjeri", class = "btn btn-primary mt-2"),
                       uiOutput("text_feedback") %>% withSpinner(type = 4, color = "#337ab7"),
                       br(),
                       uiOutput("result") %>% withSpinner(type = 4, color = "#337ab7")
@@ -82,22 +86,22 @@ server <- function(input, output, session) {
   library(tm)
   library(Matrix)
   library(stopwords)
+  library(data.table)
 
   # Source the stemming functions (ensure these files are in the app directory)
-  source("./stemmer.R")       # This should define the write_tokens function
-  source("./text_analysis.R") # If required by stemmer.R
+  source("stemmer.R")       # This should define the write_tokens function
+  source("text_analysis.R") # If required by stemmer.R
 
   # Read the precomputed TF-IDF data
   # Adjust the path to your Excel file
-  tf_idf_corpus <- read_excel("./Data/output_tf_idf.xlsx")
-  # Ensure the data has the necessary columns
-  # Assuming tf_idf_corpus has columns: document_id, word, tf_idf, idf
+  tf_idf_corpus <- read_excel("output_tf_idf.xlsx")
+  # Ensure the data has the necessary columns: document_id, word, tf_idf, idf
 
   # Preprocess the corpus data
   # Create a document-term matrix
   dtm_corpus <- tf_idf_corpus %>%
     select(document_id, word, tf_idf) %>%
-    tidyr::spread(key = word, value = tf_idf, fill = 0)
+    tidyr::pivot_wider(names_from = word, values_from = tf_idf, values_fill = 0)
 
   # Remove the document_id column for matrix operations
   corpus_matrix <- as.matrix(dtm_corpus[,-1])
@@ -125,17 +129,63 @@ server <- function(input, output, session) {
       "baš", "dakle", "osim", "svih",
       "svoju", "odnosno", "gdje",
       "kojoj", "ovi", "toga",
-      "ubera", "vozača", "hrvatskoj", "usluge", "godine", "više", "taksi", "taxi", "taksija", "taksija", "kaže", "rekao", "19"," aee", "ae","bit.ly", "https", "one", "the"
+      "ubera", "vozača", "hrvatskoj", "usluge", "godine", "više", "taksi", "taxi", "taksija", "kaže", "rekao", "19"," aee", "ae","bit.ly", "https", "one", "the"
     ),
     lexicon = "custom"
   )
 
   # Full set with diacritics
-  cro_sw_full_d <- tibble(word = c("a","ako","ali","baš","bez","bi","bih","bila","bili","bilo","bio","bismo","bit","biti","bolje","bude","čak","čega","čemu","često","četiri","čime","čini","će","ćemo","ćete","ću","da","dakle","dalje","dan","dana","dana","danas","dio","do","dobro","dok","dosta","dva","dvije","eto","evo","ga","gdje","god","godina","godine","gotovo","grada","i","iako","ići","ih","ili","im","ima","imaju","imali","imam","imao","imati","inače","ipak","isto","iz","iza","između","ja","jako","je","jedan","jedna","jednog","jednom","jednostavno","jednu","jer","joj","još","ju","ka","kad","kada","kaj","kako","kao","kaže","kod","koja","koje","kojeg","kojeg","kojem","koji","kojih","kojim","kojima","kojoj","kojom","koju","koliko","kraju","kroz","li","malo","manje","me","među","međutim","mene","meni","mi","milijuna","mislim","mjesto","mnogo","mogao","mogli","mogu","moj","mora","možda","može","možemo","možete","mu","na","način","nad","naime","nakon","nam","naravno","nas","ne","neće","nego","neka","neke","neki","nekog","nekoliko","neku","nema","nešto","netko","ni","nije","nikad","nisam","nisu","ništa","niti","no","njih","o","od","odmah","odnosno","oko","on","ona","onda","oni","onih","ono","opet","osim","ova","ovaj","ovdje","ove","ovim","ovo","ovog","ovom","ovu","pa","pak","par","po","pod","poput","posto","postoji","pred","preko","prema","pri","prije","protiv","prvi","puno","put","radi","reći","s","sa","sad","sada","sam","samo","sati","se","sebe","si","smo","ste","stoga","strane","su","svaki","sve","svi","svih","svoj","svoje","svoju","što","ta","tada","taj","tako","također","tamo","te","tek","teško","ti","tih","tijekom","time","tko","to","tog","toga","toj","toliko","tom","tome","treba","tu","u","uopće","upravo","uvijek","uz","vam","vas","već","vi","više","vrijeme","vrlo","za","zapravo","zar","zato","zbog","zna","znači"),
+  cro_sw_full_d <- tibble(word = c("a","ako","ali","baš","bez","bi","bih","bila","bili","bilo","bio","bismo","bit","biti","bolje","bude","čak","čega","čemu","često","četiri","čime","čini","će","ćemo","ćete","ću","da","dakle","dalje","dan","dana","danas","dio","do","dobro","dok","dosta","dva","dvije","eto","evo","ga","gdje","god","godina","godine","gotovo","grada","i","iako","ići","ih","ili","im","ima","imaju","imali","imam","imao","imati","inače","ipak","isto","iz","iza","između","ja","jako","je","jedan","jedna","jednog","jednom","jednostavno","jednu","jer","joj","još","ju","ka","kad","kada","kaj","kako","kao","kaže","kod","koja","koje","kojeg","kojem","koji","kojih","kojim","kojima","kojoj","kojom","koju","koliko","kraju","kroz","li","malo","manje","me","među","međutim","mene","meni","mi","milijuna","mislim","mjesto","mnogo","mogao","mogli","mogu","moj","mora","možda","može","možemo","možete","mu","na","način","nad","naime","nakon","nam","naravno","nas","ne","neće","nego","neka","neke","neki","nekog","nekoliko","neku","nema","nešto","netko","ni","nije","nikad","nisam","nisu","ništa","niti","no","njih","o","od","odmah","odnosno","oko","on","ona","onda","oni","onih","ono","opet","osim","ova","ovaj","ovdje","ove","ovim","ovo","ovog","ovom","ovu","pa","pak","par","po","pod","poput","posto","postoji","pred","preko","prema","pri","prije","protiv","prvi","puno","put","radi","reći","s","sa","sad","sada","sam","samo","sati","se","sebe","si","smo","ste","stoga","strane","su","svaki","sve","svi","svih","svoj","svoje","svoju","što","ta","tada","taj","tako","također","tamo","te","tek","teško","ti","tih","tijekom","time","tko","to","tog","toga","toj","toliko","tom","tome","treba","tu","u","uopće","upravo","uvijek","uz","vam","vas","već","vi","više","vrijeme","vrlo","za","zapravo","zar","zato","zbog","zna","znači"),
                           lexicon = "diacritics")
 
   # Combine stop words
   stop_corpus <- bind_rows(stopwords_cro, my_stop_words, cro_sw_full_d)
+
+  # Catholic-related word roots
+  katoliq_rijeci <- data.frame(
+    root = c("crkv", "svećenik", "katoličk", "pap", "svet", "bog", "biskup", "nadbiskup", "crkven", "blagoslov",
+             "kardinal", "isus", "vatikan", "žup", "vjer", "franj", "župnik", "molitv", "božj", "vjernik",
+             "mis", "grijeh", "biskupij", "benedikt", "krist", "prostor", "vlast", "vlč", "marij", "žid",
+             "duhovn", "vatikansk", "nadbiskupij", "moli", "katedra", "najveć", "vjersk", "svećenic",
+             "samostan", "fr", "vjeruj", "župn", "blagoslovljen", "katolik", "kršćansk", "gosp", "križ",
+             "svećeničk", "orgulj", "oltar", "biskupsk", "dnevn", "isusov", "kristov", "blažen", "sveti",
+             "franjevačk", "papinsk", "evanđelj", "katolic", "međugorj", "vjeronauk", "obraćenj", "kler",
+             "kršćanstv", "spasenj", "milosrđ", "euharistij", "svjetovn", "nadbiskupijsk", "stepinčev",
+             "posvet", "procesij", "biblij", "sinodaln", "svetac", "časn", "liturgij", "otajstv", "biblijsk",
+             "fratar", "ministrant")
+  )
+
+  # Dezinformation-related word roots
+  dezinfo_rijeci <- data.frame(
+    root = c("djec", "prav", "slučaj", "žen", "pitanj", "držav", "obitelj", "zlostavljanj", "seksualn", "srpsk",
+             "problem", "rat", "javn", "nek", "društv", "političk", "grijeh", "svoj", "odnos", "želi",
+             "dobi", "ivan", "osta", "vlast", "ugovor", "imovin", "medij", "moli", "stepinc", "istin",
+             "zakon", "odluk", "pobačaj", "potpun", "zemljišt", "društven", "celibat", "prič", "razlog",
+             "dogodi", "javnost", "organizacij", "činjenic", "tvrd", "unutar", "učini", "mora", "kaza",
+             "poziv", "svećenic", "državn", "izjav", "podijel", "moć", "predsjednik", "antisemitizm",
+             "nitk", "skanda", "laž", "osobn", "otvoren", "srb", "pedofilij", "pokaza", "vjeruj", "zl",
+             "nalaz", "novinar", "prilik", "situacij", "čud", "borb", "nekretnin", "unatoč", "izbor",
+             "zahtjev", "optužb", "optužen", "služben", "vlastit", "tešk", "završi", "zaštit", "institucij",
+             "kazn", "nacionaln", "osuđen", "prirod", "zločin", "dubok", "zatvor", "soton", "vraćen",
+             "djevojk", "izgubi", "izvješć", "lažn", "ukidanj", "odbi", "logor", "pedofi", "vratit",
+             "homoseksualc", "napad", "privatn", "zlostavlja", "kriv", "novc", "pavelić", "komunističk",
+             "počini", "političar", "pr", "račun", "savjest", "međugorj", "obiteljsk", "pandemij",
+             "pokor", "ponovn", "sekularn", "slik", "stan", "sveučilišt", "vjeronauk", "homoseksualnost",
+             "moraln", "premijer", "prošlost", "strašn", "gradonačelnik", "građevinsk", "istraživanj",
+             "oženjen", "sudsk", "ustašk", "štet", "darova", "dokaz", "egzorcist", "financijsk", "povra",
+             "reakcij", "rh", "sestr", "sredstv", "tam", "holokaust", "istočn", "kler", "kršćanstv",
+             "moćn", "muk", "novost", "parov", "muenchensk", "nasilj", "odgovornost", "okren", "ustaš",
+             "uživa", "dječak", "gay", "oduzet", "ogromn", "ondj", "potpor", "potvrdi", "presta",
+             "pristup", "rajčevc", "sudbin", "uvjet", "arhiv", "istospoln", "tez", "vlasništv",
+             "zaboravi", "židov", "antisemitsk", "djetet", "konzervativn", "laganj", "pedofilsk",
+             "svjetovn", "znanstven", "argument", "bogat", "bol", "bori", "jugoslav", "loš", "makn",
+             "nepravd", "neprijatelj", "postupk", "pravomoćn", "progon", "stra", "strog", "đavl",
+             "autoritet", "bož", "egzorcizm", "kaznen", "negativn", "objekt", "obvez", "orijentacij",
+             "smrtn", "demonsk", "jugoslavensk", "krivnj", "obran", "spoln", "sumnj", "aktivist",
+             "blag", "komunizm", "milijun", "nadležn", "naveden", "odgovorn", "oslobođen", "pad",
+             "prijestup", "seks", "ubijen", "afer", "aktivizm", "identitet", "ideologij", "opasnost",
+             "zlostavljač", "znanost", "istospoln", "lucifer", "zataškavanj")
+  )
 
   # Reactive expression to process and analyze the input text
   analysis_result <- eventReactive(input$check, {
@@ -174,6 +224,26 @@ server <- function(input, output, session) {
       tokens <- tokens %>%
         filter(!is.na(stem))
 
+      # Check for Catholic-related terms
+      incProgress(0.4, detail = "Provjera katoličkih pojmova...")
+      catholic_terms_found <- tokens %>%
+        filter(stem %in% katoliq_rijeci$root) %>%
+        pull(stem) %>%
+        unique()
+
+      num_catholic_terms <- length(catholic_terms_found)
+      is_catholic_article <- num_catholic_terms >= 2  # At least two terms
+
+      # Check for Dezinformation-related terms
+      incProgress(0.45, detail = "Provjera dezinformacijskih pojmova...")
+      dezinfo_terms_found <- tokens %>%
+        filter(stem %in% dezinfo_rijeci$root) %>%
+        pull(stem) %>%
+        unique()
+
+      num_dezinfo_terms <- length(dezinfo_terms_found)
+      has_dezinfo_terms <- num_dezinfo_terms >= 3  # At least three terms
+
       # Step 3: Calculate term frequency (tf)
       incProgress(0.5, detail = "Izračun frekvencije pojmova...")
       term_freq <- tokens %>%
@@ -207,7 +277,11 @@ server <- function(input, output, session) {
         return(list(
           is_fake_news = FALSE,
           max_similarity = 0,
-          message = "Nema zajedničkih riječi između unesenog teksta i korpusa."
+          message = "Nema zajedničkih riječi između unesenog teksta i korpusa.",
+          is_catholic_article = is_catholic_article,
+          catholic_terms_found = catholic_terms_found,
+          has_dezinfo_terms = has_dezinfo_terms,
+          dezinfo_terms_found = dezinfo_terms_found
         ))
       }
 
@@ -223,9 +297,9 @@ server <- function(input, output, session) {
       max_similarity <- max(cosine_similarities)
 
       # Set a threshold for fake news detection
-      threshold <- 0.5  # Adjust this threshold based on testing
+      threshold <- 0.4  # Adjust this threshold based on testing
 
-      is_fake_news <- max_similarity > threshold
+      is_fake_news <- max_similarity > threshold && has_dezinfo_terms
 
       incProgress(1, detail = "Analiza završena.")
 
@@ -234,7 +308,11 @@ server <- function(input, output, session) {
         max_similarity = max_similarity,
         similar_doc_id = dtm_corpus$document_id[which.max(cosine_similarities)],
         message = NULL,
-        term_freq = term_freq
+        term_freq = term_freq,
+        is_catholic_article = is_catholic_article,
+        catholic_terms_found = catholic_terms_found,
+        has_dezinfo_terms = has_dezinfo_terms,
+        dezinfo_terms_found = dezinfo_terms_found
       )
     })
   })
@@ -257,11 +335,19 @@ server <- function(input, output, session) {
     if (!is.null(result$message)) {
       HTML(paste("<span style='color: red;'>", result$message, "</span>"))
     } else if (result$is_fake_news) {
-      HTML(paste("<div style='color: red;'><strong>Upozorenje:</strong> Tekst ima visoku sličnost s poznatim lažnim vijestima.</div>",
-                 "<div>Sličnost:", round(result$max_similarity * 100, 2), "%</div>"))
+      HTML(paste(
+        "<div class='analysis-text' style='color: red;'><strong>Upozorenje:</strong> Tekst ima visoku sličnost s poznatim lažnim vijestima.</div>",
+        "<div class='analysis-text'>Sličnost:", round(result$max_similarity * 100, 2), "%</div>"
+      ))
+    } else if (result$is_catholic_article) {
+      HTML(paste(
+        "<div class='analysis-text' style='color: green;'><strong>Rezultat:</strong> Tekst je povezan s katoličkim temama.</div>",
+        "<div class='analysis-text'>Broj pronađenih katoličkih pojmova:", length(result$catholic_terms_found), "</div>"
+      ))
     } else {
-      HTML(paste("<div style='color: green;'><strong>Rezultat:</strong> Tekst ne pokazuje značajnu sličnost s poznatim lažnim vijestima.</div>",
-                 "<div>Sličnost:", round(result$max_similarity * 100, 2), "%</div>"))
+      HTML(paste(
+        "<div class='analysis-text'><strong>Rezultat:</strong> Tekst ne pokazuje značajnu sličnost s poznatim lažnim vijestima niti s katoličkim temama.</div>"
+      ))
     }
   })
 
@@ -270,21 +356,61 @@ server <- function(input, output, session) {
     req(analysis_result())
     result <- analysis_result()
 
+    analysis_text <- ""
+
+    if (result$is_catholic_article) {
+      catholic_terms_formatted <- paste0("<span class='analysis-word'>", result$catholic_terms_found, "</span>", collapse = ", ")
+      analysis_text <- paste0(
+        analysis_text,
+        "<p>U vašem tekstu pronađeni su sljedeći pojmovi povezani s katoličkim temama:</p>",
+        "<p>", catholic_terms_formatted, "</p>"
+      )
+    } else {
+      analysis_text <- paste0(analysis_text, "<p>Nisu pronađeni pojmovi povezani s katoličkim temama.</p>")
+    }
+
+    if (result$has_dezinfo_terms) {
+      dezinfo_terms_formatted <- paste0("<span class='analysis-word'>", result$dezinfo_terms_found, "</span>", collapse = ", ")
+      analysis_text <- paste0(
+        analysis_text,
+        "<p>Pronađeni su i sljedeći pojmovi povezani s dezinformacijama:</p>",
+        "<p>", dezinfo_terms_formatted, "</p>"
+      )
+    } else {
+      analysis_text <- paste0(analysis_text, "<p>Nisu pronađeni pojmovi povezani s dezinformacijama.</p>")
+    }
+
+    if (result$is_fake_news) {
+      analysis_text <- paste0(
+        analysis_text,
+        "<p><strong>Upozorenje:</strong> Tekst ima visoku sličnost s poznatim lažnim vijestima.</p>"
+      )
+    } else {
+      analysis_text <- paste0(
+        analysis_text,
+        "<p>Tekst ne pokazuje značajnu sličnost s poznatim lažnim vijestima.</p>"
+      )
+    }
+
+    # Display top terms contributing to the similarity
     if (!is.null(result$term_freq)) {
       # Display top terms contributing to the similarity
       top_terms <- result$term_freq %>%
         arrange(desc(tf_idf)) %>%
         head(10)
 
-      HTML(paste0(
+      analysis_text <- paste0(
+        analysis_text,
         "<h4>Najznačajniji pojmovi u tekstu:</h4>",
         "<ul>",
         paste0("<li>", top_terms$stem, " (TF-IDF: ", round(top_terms$tf_idf, 4), ")</li>", collapse = ""),
         "</ul>"
-      ))
+      )
     } else {
-      HTML("<p>Nema dostupnih podataka za detaljnu analizu.</p>")
+      analysis_text <- paste0(analysis_text, "<p>Nema dostupnih podataka za detaljnu analizu.</p>")
     }
+
+    HTML(analysis_text)
   })
 }
 
