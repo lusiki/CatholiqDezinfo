@@ -11,10 +11,12 @@ library(tm)
 library(Matrix)
 library(stopwords)
 library(data.table)
+library(tokenizers)
+library(purrr)
 
 # Define UI
 ui <- fluidPage(
-  theme = shinytheme("yeti"),  # Using the "yeti" theme for better aesthetics
+  theme = shinytheme("cerulean"),  # Using the "cerulean" theme for blue aesthetics
 
   # Custom CSS for additional styling
   tags$head(
@@ -22,20 +24,24 @@ ui <- fluidPage(
       body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
       .navbar { margin-bottom: 0; }
       .header-logo { height: 50px; margin-top: 5px; }
-      .header-title { color: #333; margin-top: 15px; }
-      .footer { background-color: #f5f5f5; padding: 10px; position: fixed; bottom: 0; width: 100%; }
-      .btn-primary { background-color: #337ab7; border-color: #2e6da4; }
-      .btn-primary:hover { background-color: #286090; border-color: #204d74; }
-      .spinner-border { color: #337ab7; }
-      .progress-bar { background-color: #337ab7; }
+      .header-title { color: #005B96; margin-top: 15px; }
+      .footer { background-color: #e3f2fd; padding: 10px; position: fixed; bottom: 0; width: 100%; }
+      .btn-primary { background-color: #005B96; border-color: #004080; }
+      .btn-primary:hover { background-color: #004080; border-color: #003366; }
+      .spinner-border { color: #005B96; }
+      .progress-bar { background-color: #005B96; }
       .analysis-text { font-size: 16px; }
-      .analysis-word { color: #d9534f; font-weight: bold; }
+      .analysis-word { color: #005B96; font-weight: bold; }
+      .header { background-color: #e3f2fd; padding: 10px; text-align: center; }
+      .tab-content { padding: 20px; }
+      .mt-2 { margin-top: 10px; }
+      .analysis-sentence { margin-bottom: 15px; }
     "))
   ),
 
   # Header with Logo and Title
   tags$header(
-    style = "background-color: #f5f5f5; padding: 10px; text-align: center;",
+    class = "header",
     tags$img(src = "logo.jpg", class = "header-logo"),
     tags$h2("Kritička analiza dezinformacija o vjerskim temama", class = "header-title")
   ),
@@ -48,15 +54,15 @@ ui <- fluidPage(
                       h3("Unesite tekst za analizu"),
                       textAreaInput("text", label = NULL, rows = 10, placeholder = "Ovdje unesite tekst..."),
                       actionButton("check", "Provjeri", class = "btn btn-primary mt-2"),
-                      uiOutput("text_feedback") %>% withSpinner(type = 4, color = "#337ab7"),
+                      uiOutput("text_feedback") %>% withSpinner(type = 4, color = "#005B96"),
                       br(),
-                      uiOutput("result") %>% withSpinner(type = 4, color = "#337ab7")
+                      uiOutput("result") %>% withSpinner(type = 4, color = "#005B96")
                )
              )
     ),
     tabPanel("Analiza",
              h3("Detaljna analiza"),
-             uiOutput("detailed_analysis")
+             uiOutput("detailed_analysis") %>% withSpinner(type = 4, color = "#005B96")
     ),
     tabPanel("Opis",
              h3("O projektu"),
@@ -79,14 +85,7 @@ ui <- fluidPage(
 # Define Server logic
 server <- function(input, output, session) {
   # Load necessary libraries
-  library(readxl)
-  library(tidytext)
-  library(dplyr)
-  library(stringr)
-  library(tm)
-  library(Matrix)
-  library(stopwords)
-  library(data.table)
+  # (Libraries already loaded globally)
 
   # Source the stemming functions (ensure these files are in the app directory)
   source("C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/CatholiqDezinfo/Application/Source/stemmer.R")       # This should define the write_tokens function
@@ -95,6 +94,7 @@ server <- function(input, output, session) {
   # Read the precomputed TF-IDF data
   # Adjust the path to your Excel file
   tf_idf_corpus <- read_excel("C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/CatholiqDezinfo/Application/Source/output_tf_idf.xlsx")
+
 
   # Ensure the data has the necessary columns: document_id, word, tf_idf, idf
 
@@ -245,6 +245,41 @@ server <- function(input, output, session) {
       num_dezinfo_terms <- length(dezinfo_terms_found)
       has_dezinfo_terms <- num_dezinfo_terms >= 3  # At least three terms
 
+      # Step 2.5: Extract sentences containing dezinfo words
+      incProgress(0.475, detail = "Pronalaženje rečenica s dezinformacijskim pojmovima...")
+      sentences <- tokenizers::tokenize_sentences(input$text)[[1]]
+      sentences_df <- tibble(sentence = sentences)
+
+      highlight_dezinfo_words <- function(sentence) {
+        words <- unlist(strsplit(sentence, "\\s+"))
+        words_lower <- tolower(words)
+        stems <- sapply(words_lower, write_tokens)
+        stems_clean <- sapply(strsplit(stems, "\t"), `[`, 2)
+        stems_clean[is.na(stems_clean)] <- ""
+
+        words_highlighted <- words
+        contains_dezinfo <- FALSE
+        for (i in seq_along(words)) {
+          if (stems_clean[i] %in% dezinfo_rijeci$root) {
+            words_highlighted[i] <- paste0("<span class='analysis-word'>", words[i], "</span>")
+            contains_dezinfo <- TRUE
+          }
+        }
+        list(
+          highlighted_sentence = paste(words_highlighted, collapse = " "),
+          contains_dezinfo = contains_dezinfo
+        )
+      }
+
+      sentence_analysis <- lapply(sentences, highlight_dezinfo_words)
+      sentences_df$highlighted_sentence <- sapply(sentence_analysis, `[[`, "highlighted_sentence")
+      sentences_df$contains_dezinfo <- sapply(sentence_analysis, `[[`, "contains_dezinfo")
+
+      # Extract sentences that contain dezinfo words
+      dezinfo_sentences <- sentences_df %>%
+        filter(contains_dezinfo) %>%
+        pull(highlighted_sentence)
+
       # Step 3: Calculate term frequency (tf)
       incProgress(0.5, detail = "Izračun frekvencije pojmova...")
       term_freq <- tokens %>%
@@ -282,7 +317,8 @@ server <- function(input, output, session) {
           is_catholic_article = is_catholic_article,
           catholic_terms_found = catholic_terms_found,
           has_dezinfo_terms = has_dezinfo_terms,
-          dezinfo_terms_found = dezinfo_terms_found
+          dezinfo_terms_found = dezinfo_terms_found,
+          dezinfo_sentences = dezinfo_sentences
         ))
       }
 
@@ -313,7 +349,8 @@ server <- function(input, output, session) {
         is_catholic_article = is_catholic_article,
         catholic_terms_found = catholic_terms_found,
         has_dezinfo_terms = has_dezinfo_terms,
-        dezinfo_terms_found = dezinfo_terms_found
+        dezinfo_terms_found = dezinfo_terms_found,
+        dezinfo_sentences = dezinfo_sentences
       )
     })
   })
@@ -377,6 +414,20 @@ server <- function(input, output, session) {
         "<p>Pronađeni su i sljedeći pojmovi povezani s dezinformacijama:</p>",
         "<p>", dezinfo_terms_formatted, "</p>"
       )
+
+      # Display sentences containing dezinfo words
+      if (length(result$dezinfo_sentences) > 0) {
+        analysis_text <- paste0(
+          analysis_text,
+          "<h4>Rečenice u kojima su pronađeni dezinformacijski pojmovi:</h4>"
+        )
+        for (sentence in result$dezinfo_sentences) {
+          analysis_text <- paste0(
+            analysis_text,
+            "<p class='analysis-sentence'>", sentence, "</p>"
+          )
+        }
+      }
     } else {
       analysis_text <- paste0(analysis_text, "<p>Nisu pronađeni pojmovi povezani s dezinformacijama.</p>")
     }
