@@ -54,7 +54,7 @@ conn <- dbConnect(RMySQL::MySQL(), dbname = "determ_all", host = "127.0.0.1",
                   user = "Lux", password = "Theanswer0207", local_infile = TRUE)
 
 query <- "SELECT * FROM media_space_2023"
-data22 <- dbGetQuery(conn, query)
+data23 <- dbGetQuery(conn, query)
 
 #fwrite(data22, "C:/Users/lukas/Desktop/dta22.xlsx")
 ```
@@ -90,9 +90,6 @@ dta22 %>%
 ```
 
 ```{r echo=F, eval=F, message=F , warning= FALSE}
-
-
-
 
 # do this for all files in the folder
 
