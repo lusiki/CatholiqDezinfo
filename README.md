@@ -88,9 +88,16 @@ __godina 2022__(N=20,103)
 
 
 
-__godina 2023__(N=32,417)
+__godina 2023__(N=4,188)
 
 [download](https://www.dropbox.com/scl/fi/ad3vac6umtd3mq4238xpv/catoliq23.xlsx?rlkey=4pvqphrciovemyc3vr9wo3pvz&dl=0)
+
+
+__godina 2024__(N=32,417)
+
+[download](https://www.dropbox.com/scl/fi/jp8e11qtotd3jwr8apsu1/catoliq24.xlsx?rlkey=hs9ilsxrvwppurm2skue54a1f&dl=0)
+
+
 5. sve tekuće dezinformacije
 
 __Katolicke dezinfo objave__(N=177)

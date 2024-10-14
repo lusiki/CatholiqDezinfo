@@ -70,6 +70,8 @@ data
 
 data23 %>%
   filter(SOURCE_TYPE == "web") %>%
+  # filter only year 2024
+  filter(year(DATE) == 2024) %>%
   group_by(FROM_SITE) %>%
   summarise(Count = n()) %>%
   arrange(desc(Count)) %>%
@@ -84,15 +86,17 @@ data23 %>%
 # count number of rows per site
 # 
 # 
-# data23 %>%
-#   filter(FROM_SITE %in% top20) %>%
-#   group_by(FROM_SITE) %>%
-#   summarise(Count = n()) %>%
-#   arrange(desc(Count)) %>%
-#   mutate(Percentage = (Count / sum(Count)) * 100, # Calculate percentage
-#          Cumulative_Percentage = cumsum(Percentage)) %>% # Calculate cumulative percentage
-#   head(25) %>%
-#   pull(FROM_SITE) -> top20
+data23 %>%
+  filter(FROM_SITE %in% top20) %>%
+  # filter only year 2024
+  filter(year(DATE) == 2024) %>%
+  group_by(FROM_SITE) %>%
+  summarise(Count = n()) %>%
+  arrange(desc(Count)) %>%
+  mutate(Percentage = (Count / sum(Count)) * 100, # Calculate percentage
+         Cumulative_Percentage = cumsum(Percentage)) %>% # Calculate cumulative percentage
+  head(25) %>%
+  pull(FROM_SITE) -> top20
 
 ```
 
@@ -101,7 +105,9 @@ data23 %>%
 # do this for all files in the folder
 
 dta22_filter <- data23 %>% 
-  filter(FROM_SITE %in% top20)
+  filter(FROM_SITE %in% top20)%>%
+  # filter only year 2024
+  filter(year(DATE) == 2024)
   
 # remove last two columns
 
@@ -241,14 +247,14 @@ for (i in 1:num_batches) {
 }
 
 
-catoliq22 <- dta22_filter[has_word==T,]
+catoliq24 <- dta22_filter[has_word==T,]
 
 
 rbind(catoliq23_1, catoliq23_2, catoliq23_3, catoliq23_4, catoliq23_5, catoliq23_6, catoliq23_7, catoliq23_8, catoliq23_9, catoliq23_10, catoliq23_11, catoliq23_12, catoliq23_13) -> catoliq23
 
 
 
-write.xlsx(catoliq22, "C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/catoliq22.xlsx")
+write.xlsx(catoliq24, "C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/catoliq24.xlsx")
 
 
 
