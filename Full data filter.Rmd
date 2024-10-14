@@ -53,30 +53,22 @@ source("./write_tokens.R")
 conn <- dbConnect(RMySQL::MySQL(), dbname = "determ_all", host = "127.0.0.1",
                   user = "Lux", password = "Theanswer0207", local_infile = TRUE)
 
-query <- "SELECT * FROM media_space_2023"
+query <- "SELECT * FROM media_space_2024"
 data23 <- dbGetQuery(conn, query)
 
 #fwrite(data22, "C:/Users/lukas/Desktop/dta22.xlsx")
 ```
 
-```{r}
-dta23 <- fread("C:/Users/lukas/Desktop/dta23.xlsx")
-dta22 <- fread("C:/Users/lukas/Desktop/dta22.xlsx")
-
-```
-
 
 ```{r echo=F, eval=T, message=F , warning= FALSE}
 
-
 range(data23$DATE)
 
- 
 #filter only web from column FROM and make a count number of rows per 
 
 data
 
-dta22 %>%
+data23 %>%
   filter(SOURCE_TYPE == "web") %>%
   group_by(FROM_SITE) %>%
   summarise(Count = n()) %>%
@@ -87,62 +79,77 @@ dta22 %>%
   pull(FROM_SITE) -> top20
 
 
+
+
+# count number of rows per site
+# 
+# 
+# data23 %>%
+#   filter(FROM_SITE %in% top20) %>%
+#   group_by(FROM_SITE) %>%
+#   summarise(Count = n()) %>%
+#   arrange(desc(Count)) %>%
+#   mutate(Percentage = (Count / sum(Count)) * 100, # Calculate percentage
+#          Cumulative_Percentage = cumsum(Percentage)) %>% # Calculate cumulative percentage
+#   head(25) %>%
+#   pull(FROM_SITE) -> top20
+
 ```
 
 ```{r echo=F, eval=F, message=F , warning= FALSE}
 
 # do this for all files in the folder
 
-dta22_filter <- dta22 %>% 
+dta22_filter <- data23 %>% 
   filter(FROM_SITE %in% top20)
   
 # remove last two columns
 
-dta23_filter <- dta23_filter %>% select(-c(46,47))
+dta22_filter <- dta22_filter %>% select(-c(46,47))
 
 proba1 =
-  dta23_filter %>%
+  dta22_filter %>%
   slice(1:100000) 
 
 proba2 =
-  dta23_filter %>%
+  dta22_filter %>%
   slice(100001:200000)
 
 proba3 =
-  dta23_filter %>%
+  dta22_filter %>%
   slice(200001:300000)
 proba4 =
-  dta23_filter %>%
+  dta22_filter %>%
   slice(300001:400000)
 proba5 =
-  dta23_filter %>%
+  dta22_filter %>%
   slice(400001:500000)
 proba6 =
-  dta23_filter %>%
+  dta22_filter %>%
   slice(500001:600000)
 proba7 =
-  dta23_filter %>%
+  dta22_filter %>%
   slice(600001:700000)
 proba8 = 
-  dta23_filter %>%
+  dta22_filter %>%
   slice(700001:800000)
 
 proba9 = 
-  dta23_filter %>%
+  dta22_filter %>%
   slice(800001:900000)
 
 proba10 = 
-  dta23_filter %>%
+  dta22_filter %>%
   slice(900001:1000000)
 proba11 = 
-  dta23_filter %>%
+  dta22_filter %>%
   slice(1000001:1100000)
 proba12 = 
-  dta23_filter %>%
+  dta22_filter %>%
   slice(1100001:1200000)
 
 proba13 = 
-  dta23_filter %>%
+  dta22_filter %>%
   slice(1200001:1300000)
 
 
@@ -158,17 +165,9 @@ for (i in 1:num_slices) {
   end <- i * 100000
   
   # Create each sliced data frame and add it to the list
-  proba_list[[i]] <- dta23_filter %>%
+  proba_list[[i]] <- dta22_filter %>%
     slice(start:end)
 }
-
-
-
-
-
-  
-
-write.xlsx(pravno20, "C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/pravno20.xlsx")
 
 
 

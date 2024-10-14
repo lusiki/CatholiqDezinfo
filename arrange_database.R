@@ -11,11 +11,11 @@ conn <- dbConnect(RMySQL::MySQL(), dbname = "determ_all", host = "127.0.0.1",
                   user = "Lux", password = "Theanswer0207", local_infile = TRUE)
 
 can_connect <- dbCanConnect(RMySQL::MySQL(), dbname = "determ", host = "127.0.0.1",
-                            user = "Lux", password = "Theanswer0207")
+                            user = "Lux", password = "Theanswer0207", local_infile = TRUE)
 
 ### create table----
 dbExecute(conn, "
-CREATE TABLE media_space_2021 (
+CREATE TABLE media_space_2024 (
     DATE VARCHAR(10),                 -- assuming date as 'YYYY-MM-DD'
     TIME VARCHAR(8),                  -- assuming time as 'HH:MM:SS'
     TITLE TEXT,                       -- TEXT for longer string
@@ -66,7 +66,7 @@ CREATE TABLE media_space_2021 (
 
 ### arrange data ----
 
-file_list <- list.files(path = "C:/Users/lukas/Dropbox/Determ_mediaspace/2023", pattern = "*.xlsx", full.names = TRUE)
+file_list <- list.files(path = "C:/Users/lukas/Dropbox/Determ_mediaspace/2024", pattern = "*.xlsx", full.names = TRUE)
 
 
 # Function to extract and parse the first date in the filename
@@ -107,7 +107,7 @@ for (file_path in sorted_files) {
   # Write the data frame to the database
   # Using tryCatch to handle potential errors for individual files
   tryCatch({
-    dbWriteTable(conn, "media_space_2023", df, append = TRUE, row.names = FALSE)
+    dbWriteTable(conn, "media_space_2024", df, append = TRUE, row.names = FALSE)
   }, error = function(e) {
     message("Error with file: ", file_path)
     message("Error message: ", e$message)
