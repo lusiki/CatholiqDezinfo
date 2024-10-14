@@ -2,7 +2,7 @@
 
 
 # read in lexicons
-CroSentilex_n <- read.delim("C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/CatholiqDezinfo/Application/Source/crosentilex-negatives.txt",
+CroSentilex_n <- read.delim("./Source/crosentilex-negatives.txt",
                             header = FALSE,
                             sep = " ",
                             stringsAsFactors = FALSE,
@@ -10,7 +10,7 @@ CroSentilex_n <- read.delim("C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/
   rename(word = "V1", sentiment = "V2" ) %>%
   mutate(brija = "NEG")
 
-CroSentilex_p  <- read.delim("C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/CatholiqDezinfo/Application/Source/crosentilex-positives.txt",
+CroSentilex_p  <- read.delim("./Source/crosentilex-positives.txt",
                              header = FALSE,
                              sep = " ",
                              stringsAsFactors = FALSE,
@@ -23,7 +23,7 @@ Crosentilex_sve <- rbind(setDT(CroSentilex_n), setDT(CroSentilex_p))
 #head(sample_n(Crosentilex_sve,1000),15)
 
 
-CroSentilex_Gold  <- read.delim2("C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/CatholiqDezinfo/Application/Source/gs-sentiment-annotations.txt",
+CroSentilex_Gold  <- read.delim2("./Source/gs-sentiment-annotations.txt",
                                  header = FALSE,
                                  sep = " ",
                                  stringsAsFactors = FALSE) %>%
@@ -37,8 +37,8 @@ CroSentilex_Gold$sentiment <- as.numeric(unlist(CroSentilex_Gold$sentiment))
 #head(sample_n(CroSentilex_Gold,100),15)
 
 
-LilaHR  <- read_excel("C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/CatholiqDezinfo/Application/Source/lilaHR_clean.xlsx", sheet = "Sheet1") %>% select (-"...1")
-LilaHR_long <- read_excel("C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/CatholiqDezinfo/Application/Source/lilaHR_clean_long.xlsx", sheet = "Sheet1") %>% select (-"...1")
+LilaHR  <- read_excel("./Source/lilaHR_clean.xlsx", sheet = "Sheet1") %>% select (-"...1")
+LilaHR_long <- read_excel("./Source/lilaHR_clean_long.xlsx", sheet = "Sheet1") %>% select (-"...1")
 
 
 

@@ -88,13 +88,39 @@ server <- function(input, output, session) {
   # (Libraries already loaded globally)
 
   # Source the stemming functions (ensure these files are in the app directory)
-  source("C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/CatholiqDezinfo/Application/Source/stemmer.R")       # This should define the write_tokens function
-  source("C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/CatholiqDezinfo/Application/Source/text_analysis.R") # If required by stemmer.R
+
+
+  # base_dir <- file.path(getwd(), "Application")
+  # # Source the stemming functions (ensure these files are in the Application/Source directory)
+  # source(file.path(base_dir, "Source/stemmer.R"))       # This should define the write_tokens function
+  # source(file.path(base_dir, "Source/text_analysis.R")) # If required by stemmer.R
+  #
+  # # Read the precomputed TF-IDF data
+  # tf_idf_corpus <- read_excel(file.path(base_dir, "Source/output_tf_idf.xlsx"))
+  #
+
+
+
+  source("./Source/stemmer.R")       # This should define the write_tokens function
+  source("./Source/text_analysis.R") # If required by stemmer.R
 
   # Read the precomputed TF-IDF data
   # Adjust the path to your Excel file
-  tf_idf_corpus <- read_excel("C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/CatholiqDezinfo/Application/Source/output_tf_idf.xlsx")
+  tf_idf_corpus <- read_excel("./Source/output_tf_idf.xlsx")
 
+
+
+
+
+
+#
+# source("C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/CatholiqDezinfo/Application/Source/stemmer.R")       # This should define the write_tokens function
+# source("C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/CatholiqDezinfo/Application/Source/text_analysis.R") # If required by stemmer.R
+#
+# # Read the precomputed TF-IDF data
+# # Adjust the path to your Excel file
+# tf_idf_corpus <- read_excel("C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/CatholiqDezinfo/Application/Source/output_tf_idf.xlsx")
+#
 
   # Ensure the data has the necessary columns: document_id, word, tf_idf, idf
 
