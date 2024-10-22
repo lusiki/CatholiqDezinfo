@@ -58,25 +58,38 @@ data_list <- lapply(file_list, read_excel)
 # Find common columns across all dataframes
 common_columns <- Reduce(intersect, lapply(data_list, colnames))
 
-# Bind only the common columns together
-data_combined <- lapply(data_list, function(df) df[ , common_columns, drop = FALSE]) %>% bind_rows()
-data_combined <- data_combined %>% distinct(URL, .keep_all = TRUE)
+# Convert DATE columns to Date format in all data frames and handle other potential type issues
+data_list <- lapply(data_list, function(df) {
+  if ("DATE" %in% names(df)) {
+    df$DATE <- as.Date(df$DATE) # Convert DATE column to Date type
+  }
+  if ("has_match" %in% names(df)) {
+    df$has_match <- as.logical(df$has_match) # Ensure consistency in has_match column type
+  }
+  df
+})
 
+# Bind rows together for only the common columns
+data_combined <- lapply(data_list, function(df) df[, common_columns, drop = FALSE]) %>% bind_rows()
+
+# Keep only distinct rows based on the URL column
+data_combined <- data_combined %>% distinct(URL, .keep_all = TRUE)
 
 # Read the second Excel file
 second_file_path <- "C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Dezinformacijski članci/URL_all.xlsx"
 data_second <- read_excel(second_file_path)
+
+# Keep distinct rows in the second dataframe based on the URL column
 data_second <- data_second %>% distinct(URL, .keep_all = TRUE)
 
-# Filter rows in the first dataframe based on URLs in the second dataframe
+# Filter rows in the combined dataframe based on URLs in the second dataframe
 filtered_data <- data_combined %>% filter(URL %in% data_second$URL)
 
 # Keep only unique rows based on the URL column in the filtered data
 filtered_data_unique <- filtered_data %>% distinct(URL, .keep_all = TRUE)
 
-# View the unique filtered data
-head(filtered_data_unique)
-
+# View the unique filtered data (first few rows)
+print(head(filtered_data_unique))
 
 
 ```
