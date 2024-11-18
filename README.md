@@ -98,6 +98,30 @@ __godina 2024__(N=32,417)
 [download](https://www.dropbox.com/scl/fi/jp8e11qtotd3jwr8apsu1/catoliq24.xlsx?rlkey=hs9ilsxrvwppurm2skue54a1f&dl=0)
 
 
+
+
+5. faza filtriranja (sve osim 25) najvećih portala među katoličkim objavama po godinama
+
+
+__godina 2022__(N=)
+
+[download]()
+
+
+
+__godina 2023__(N=)
+
+[download]()
+
+
+__godina 2024__(N=)
+
+[download]()
+
+
+
+
+
 5. sve tekuće dezinformacije
 
 __Katolicke dezinfo objave__(N=284)

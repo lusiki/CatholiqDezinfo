@@ -54,7 +54,7 @@ conn <- dbConnect(RMySQL::MySQL(), dbname = "determ_all", host = "127.0.0.1",
                   user = "Lux", password = "Theanswer0207", local_infile = TRUE)
 
 query <- "SELECT * FROM media_space_2024"
-data23 <- dbGetQuery(conn, query)
+data24 <- dbGetQuery(conn, query)
 
 #fwrite(data22, "C:/Users/lukas/Desktop/dta22.xlsx")
 ```
@@ -68,7 +68,7 @@ range(data23$DATE)
 
 data
 
-data23 %>%
+data24 %>%
   filter(SOURCE_TYPE == "web") %>%
   # filter only year 2024
   filter(year(DATE) == 2024) %>%
@@ -81,33 +81,52 @@ data23 %>%
   pull(FROM_SITE) -> top20
 
 
+```
+
+```{r}
 
 
-# count number of rows per site
-# 
-# 
-data23 %>%
-  filter(FROM_SITE %in% top20) %>%
-  # filter only year 2024
-  filter(year(DATE) == 2024) %>%
-  group_by(FROM_SITE) %>%
-  summarise(Count = n()) %>%
-  arrange(desc(Count)) %>%
-  mutate(Percentage = (Count / sum(Count)) * 100, # Calculate percentage
-         Cumulative_Percentage = cumsum(Percentage)) %>% # Calculate cumulative percentage
-  head(25) %>%
-  pull(FROM_SITE) -> top20
+top25 <- data24 %>%
+  filter(SOURCE_TYPE == "web") %>%          # Filter for SOURCE_TYPE "web"
+  filter(year(DATE) == 2024) %>%            # Filter for the year 2024
+  group_by(FROM_SITE) %>%                    # Group by FROM_SITE
+  summarise(Count = n(), .groups = 'drop') %>% # Count occurrences and drop grouping
+  arrange(desc(Count)) %>%                   # Arrange in descending order of Count
+  mutate(
+    Percentage = (Count / sum(Count)) * 100,  # Calculate percentage
+    Cumulative_Percentage = cumsum(Percentage) # Calculate cumulative percentage
+  ) %>%
+  slice_head(n = 25) %>%                     # Select the top 25
+  pull(FROM_SITE)   
+
+
+not_top25 <- data24 %>%
+  filter(SOURCE_TYPE == "web")%>%
+  filter(year(DATE) == 2024) %>%               # Ensure only year 2024 is considered
+  filter(!(FROM_SITE %in% top25)) %>%                     # Select the top 25
+  pull(FROM_SITE)  
+
+
+
+# filter data24 for dta24_filtered
+
+
+dta24_filter <- data24 %>%
+  filter(SOURCE_TYPE == "web") %>%          # Filter for SOURCE_TYPE "web"
+  filter(year(DATE) == 2024) %>%            # Filter for the year 2024
+  filter(FROM_SITE %in% not_top25) %>%       # Exclude sites in top25
+
+
+
+
+# Exclude sites in top25
 
 ```
 
+
 ```{r echo=F, eval=F, message=F , warning= FALSE}
 
-# do this for all files in the folder
 
-dta22_filter <- data23 %>% 
-  filter(FROM_SITE %in% top20)%>%
-  # filter only year 2024
-  filter(year(DATE) == 2024)
   
 # remove last two columns
 
@@ -181,21 +200,14 @@ for (i in 1:num_slices) {
 
 
 
-
-
 ```{r}
 
 
-setDT(dta22_filter)
-dta22_filter[, FULL_TEXT := tolower(FULL_TEXT)]
+setDT(dta24_filter)
+dta24_filter[, FULL_TEXT := tolower(FULL_TEXT)]
 
 
-
-
-
-
-
-generalno <- c("crkva", "biskup", "Kaptol", "časna", "sestra", "svećenik", "župnik", "vjernik", "kardinal", "papa", "sveti otac", "redovnik", "redovnica","kršćanstvo", "vjera", "Gospa", "Isus", "katolički", "misa", "pričest", "krizma", "grijeh", "vjeroučitelj", "vjeronauk", "blagoslov","svjedočanstvo", "relikvija", "stigma", "duhovnost", "velečasni","zaređenje", "krunica", "vjeronauk", "ukazanje","Stepinac","Damir Stojić", "Ike", "Mandurić","Vlado Košić","Tomić", "Pofuk", "HBK", "Opus Dei", "Protagora","Caritas","vatikanski", "blagoslova","sakramenata", "prolife", "sekularizacija", "sekularna", "klerikalizam", "Crkva", "veličaju" ,"ustaštvo", "oduzimaju", "prava", "katoličku", "državu", "afera", "Kaptola",  "vjeronauk" ,"vatikanski", "klerikalna", "rodna" ,"ideologija", "klerikalizam" ,"brak", "blagoslovili" , "sekularna","Katolička", "pobačaj", "abortus",  "jezuiti", "prekrštavanje", "izopćen", "bludničio",  "posvećenje", "inkardiniran", "inkardinacija", "dogma", "kontroverzni svećenik", "moderni svećenik", "tolerantna", "vjerska kontrola", "crkveni mediji", "vjerski mediji", "pedofil", "homoseksualnost", "patrijarhat", "ozdravljenje", "čudo") %>% tolower()
+generalno <- c("crkva", "biskup", "Kaptol", "časna", "sestra", "svećenik", "župnik", "vjernik", "kardinal", "papa", "sveti otac", "redovnik", "redovnica","kršćanstvo", "vjera", "Gospa", "Isus", "katolički", "misa", "pričest", "krizma", "grijeh", "vjeroučitelj", "vjeronauk", "blagoslov","svjedočanstvo", "relikvija", "stigma", "duhovnost", "velečasni","zaređenje", "krunica", "vjeronauk", "ukazanje","Stepinac", "HBK", "Opus Dei", "Caritas","vatikanski", "blagoslova","sakramenata", "prolife", "sekularizacija", "sekularna", "klerikalizam", "Crkva", "veličaju" ,"ustaštvo", "oduzimaju", "prava", "katoličku", "državu", "afera", "Kaptola",  "vjeronauk" ,"vatikanski", "klerikalna", "rodna" ,"ideologija", "klerikalizam" ,"brak", "blagoslovili" , "sekularna","Katolička", "pobačaj", "abortus",  "jezuiti", "prekrštavanje", "izopćen", "bludničio",  "posvećenje", "inkardiniran", "inkardinacija", "dogma", "kontroverzni svećenik", "moderni svećenik", "tolerantna", "vjerska kontrola", "pedofil", "homoseksualnost", "patrijarhat", "ozdravljenje", "čudo") %>% tolower()
 genralno_root <- sapply(generalno, write_tokens)
 genralno_root <- sapply(strsplit(genralno_root, "\t"), `[`, 2)
 generalno <- enframe(genralno_root, name = "name", value = "root")
