@@ -103,20 +103,20 @@ __godina 2024__(N=32,417)
 5. faza filtriranja (sve osim 25) najvećih portala među katoličkim objavama po godinama
 
 
-__godina 2022__(N=)
+__godina 2022__(N=34,283)
 
-[download]()
+[download](https://www.dropbox.com/scl/fi/8jo540guucaf4emdqqgs7/catoliq22_not_top_25.xlsx?rlkey=fqvuv6fzeke198xi1p9a0icqw&dl=0)
 
-
+ 
 
 __godina 2023__(N=)
 
-[download]()
+[download](https://www.dropbox.com/scl/fi/p7l6dfq30ns7s94h0z27j/catoliq23_not_top_25.xlsx?rlkey=yzwhh2eri98obweqshyi46etp&dl=0)
 
 
 __godina 2024__(N=)
 
-[download]()
+[download](https://www.dropbox.com/scl/fi/q86otvp8f7kplyubafmgc/catoliq24_not_top_25.xlsx?rlkey=h8b6c933qx4dl1155a7kgw8dw&dl=0)
 
 
 

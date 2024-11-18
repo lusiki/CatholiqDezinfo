@@ -53,8 +53,8 @@ source("./write_tokens.R")
 conn <- dbConnect(RMySQL::MySQL(), dbname = "determ_all", host = "127.0.0.1",
                   user = "Lux", password = "Theanswer0207", local_infile = TRUE)
 
-query <- "SELECT * FROM media_space_2024"
-data24 <- dbGetQuery(conn, query)
+query <- "SELECT * FROM media_space_2022"
+data22 <- dbGetQuery(conn, query)
 
 #fwrite(data22, "C:/Users/lukas/Desktop/dta22.xlsx")
 ```
@@ -68,7 +68,7 @@ range(data23$DATE)
 
 data
 
-data24 %>%
+data23 %>%
   filter(SOURCE_TYPE == "web") %>%
   # filter only year 2024
   filter(year(DATE) == 2024) %>%
@@ -86,9 +86,9 @@ data24 %>%
 ```{r}
 
 
-top25 <- data24 %>%
+top25 <- data22 %>%
   filter(SOURCE_TYPE == "web") %>%          # Filter for SOURCE_TYPE "web"
-  filter(year(DATE) == 2024) %>%            # Filter for the year 2024
+  filter(year(DATE) == 2022) %>%            # Filter for the year 2024
   group_by(FROM_SITE) %>%                    # Group by FROM_SITE
   summarise(Count = n(), .groups = 'drop') %>% # Count occurrences and drop grouping
   arrange(desc(Count)) %>%                   # Arrange in descending order of Count
@@ -100,9 +100,9 @@ top25 <- data24 %>%
   pull(FROM_SITE)   
 
 
-not_top25 <- data24 %>%
+not_top25 <- data22 %>%
   filter(SOURCE_TYPE == "web")%>%
-  filter(year(DATE) == 2024) %>%               # Ensure only year 2024 is considered
+  filter(year(DATE) == 2022) %>%               # Ensure only year 2024 is considered
   filter(!(FROM_SITE %in% top25)) %>%                     # Select the top 25
   pull(FROM_SITE)  
 
@@ -111,10 +111,10 @@ not_top25 <- data24 %>%
 # filter data24 for dta24_filtered
 
 
-dta24_filter <- data24 %>%
+dta22_filter <- data22 %>%
   filter(SOURCE_TYPE == "web") %>%          # Filter for SOURCE_TYPE "web"
-  filter(year(DATE) == 2024) %>%            # Filter for the year 2024
-  filter(FROM_SITE %in% not_top25) %>%       # Exclude sites in top25
+  filter(year(DATE) == 2022) %>%            # Filter for the year 2024
+  filter(FROM_SITE %in% not_top25)    # Exclude sites in top25
 
 
 
@@ -203,11 +203,12 @@ for (i in 1:num_slices) {
 ```{r}
 
 
-setDT(dta24_filter)
-dta24_filter[, FULL_TEXT := tolower(FULL_TEXT)]
+setDT(dta22_filter)
+
+dta22_filter[, FULL_TEXT := tolower(FULL_TEXT)]
 
 
-generalno <- c("crkva", "biskup", "Kaptol", "časna", "sestra", "svećenik", "župnik", "vjernik", "kardinal", "papa", "sveti otac", "redovnik", "redovnica","kršćanstvo", "vjera", "Gospa", "Isus", "katolički", "misa", "pričest", "krizma", "grijeh", "vjeroučitelj", "vjeronauk", "blagoslov","svjedočanstvo", "relikvija", "stigma", "duhovnost", "velečasni","zaređenje", "krunica", "vjeronauk", "ukazanje","Stepinac", "HBK", "Opus Dei", "Caritas","vatikanski", "blagoslova","sakramenata", "prolife", "sekularizacija", "sekularna", "klerikalizam", "Crkva", "veličaju" ,"ustaštvo", "oduzimaju", "prava", "katoličku", "državu", "afera", "Kaptola",  "vjeronauk" ,"vatikanski", "klerikalna", "rodna" ,"ideologija", "klerikalizam" ,"brak", "blagoslovili" , "sekularna","Katolička", "pobačaj", "abortus",  "jezuiti", "prekrštavanje", "izopćen", "bludničio",  "posvećenje", "inkardiniran", "inkardinacija", "dogma", "kontroverzni svećenik", "moderni svećenik", "tolerantna", "vjerska kontrola", "pedofil", "homoseksualnost", "patrijarhat", "ozdravljenje", "čudo") %>% tolower()
+generalno <- c("crkva", "biskup", "Kaptol", "časna", "sestra", "svećenik", "župnik", "vjernik", "kardinal", "papa", "sveti otac", "redovnik", "redovnica","kršćanstvo", "vjera", "Gospa", "Isus", "katolički", "misa", "pričest", "krizma", "grijeh", "vjeroučitelj", "vjeronauk", "blagoslov","svjedočanstvo", "relikvija", "stigma", "duhovnost", "velečasni","zaređenje", "krunica", "vjeronauk", "ukazanje","Stepinac", "HBK", "Opus Dei", "Caritas","vatikanski", "blagoslova","sakramenata", "prolife", "sekularizacija", "sekularna", "klerikalizam", "Crkva", "veličaju" ,"ustaštvo", "oduzimaju", "prava", "katoličku", "državu", "afera", "Kaptola",  "vjeronauk" ,"vatikanski", "klerikalna", "rodna" ,"ideologija", "klerikalizam" ,"brak", "blagoslovili" , "sekularna","Katolička", "pobačaj", "abortus",  "jezuiti", "prekrštavanje", "izopćen", "bludničio",  "posvećenje", "inkardiniran", "inkardinacija", "dogma", "tolerantna", "vjerska kontrola", "pedofil", "homoseksualnost", "patrijarhat", "ozdravljenje", "čudo") %>% tolower()
 genralno_root <- sapply(generalno, write_tokens)
 genralno_root <- sapply(strsplit(genralno_root, "\t"), `[`, 2)
 generalno <- enframe(genralno_root, name = "name", value = "root")
@@ -259,14 +260,14 @@ for (i in 1:num_batches) {
 }
 
 
-catoliq24 <- dta22_filter[has_word==T,]
+catoliq22 <- dta22_filter[has_word==T,]
 
 
 rbind(catoliq23_1, catoliq23_2, catoliq23_3, catoliq23_4, catoliq23_5, catoliq23_6, catoliq23_7, catoliq23_8, catoliq23_9, catoliq23_10, catoliq23_11, catoliq23_12, catoliq23_13) -> catoliq23
 
 
 
-write.xlsx(catoliq24, "C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/catoliq24.xlsx")
+write.xlsx(catoliq22, "C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/Data/Inicjalno citanje/catoliq22_not_top_25.xlsx")
 
 
 
