@@ -1,0 +1,646 @@
+---
+title: "SHKM_Analiza"
+author: "Lux"
+date: "2024-11-20"
+output: html_document
+---
+```{r setup, include=T, message=FALSE, warning = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r echo=F, eval=T, message=F , warning= FALSE, message=F}
+library(tidyverse)
+library(readxl)
+library(xlsx)
+library(here)
+library(kableExtra)
+library(DT)
+library(purrr)
+library(data.table)
+library(tidytext)
+library(dplyr)
+library(lubridate)
+library(anytime)
+library(grid)
+library(wordcloud)
+library(reshape2)
+library(ggraph)
+library(widyr)
+library(topicmodels)
+library(ggthemes)
+library(xlsx)
+library(writexl)
+library(data.table)
+library(stringi)
+library(readxl)
+
+```
+
+
+```{r echo=F, eval=T, message=F , warning= FALSE, message=F}
+source("./stemmer.R")
+source("./text_analysis.R")
+```
+
+
+## Učitaj podatke
+```{r echo=F, eval=T, message=F , warning= FALSE}
+#all <- fread("D:/LUKA/Freelance/Mediatoolkit/MktFULLtxt.csv")
+dt <- read_excel("C:/Users/lukas/Dropbox/HKS/Projekti/Digitalni Kat/SHKM/sve_title_24.xlsx") 
+# add a row id
+dt <- dt %>% mutate(row_id = row_number())
+```
+
+
+
+
+
+## EDA
+
+#### Deskriptiva na dnevnoj razini
+```{r echo=F, eval=T, message=F , warning= FALSE}
+# articles over time
+daily_counts <- dt %>%
+  group_by(DATE) %>%
+  summarise(count = n())
+
+# descriptives 
+summ <- daily_counts %>% 
+  summarize(min = min(count), max = max(count), 
+            mean = mean(count), q1= quantile(count, probs = 0.25), 
+            median = median(count), q3= quantile(count, probs = 0.75),
+            sd = sd(count)) %>%
+  mutate_if(is.numeric, round, digits=2) 
+
+summ
+```
+
+#### Broj objava po danima  
+```{r echo=F, eval=T, message=F , warning= FALSE}
+# create bar chart  of articles over time
+
+ggplot(daily_counts, aes(x = DATE, y = count)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  ggtitle("Broj objava po danima") +
+  labs(x = "Datum", y = "Broj objava") +
+  theme_economist() +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))
+
+
+
+ 
+
+```
+
+
+#### Broj objava po portalima
+```{r echo=F, eval=F, message=F , warning= FALSE}
+
+
+dt <- dt %>% mutate(FROM = gsub("^(.*?)\\.hr.*", "\\1", URL))
+dt <- dt %>% mutate(FROM = gsub("http://", "", FROM))
+dt <- dt %>% mutate(FROM = gsub("https://www.", "", FROM))
+dt <- dt %>% mutate(FROM = gsub("https://", "", FROM))
+dt <- dt %>% mutate(FROM = gsub("www.", "", FROM))
+
+# Portals by activity
+activity <- dt %>%
+  group_by(FROM) %>%
+  summarise(count = n()) %>%
+  mutate(percent = round(count / sum(count) * 100,2)) %>% 
+  arrange(desc(count))
+
+datatable(activity, options = list(scrollX = TRUE, scrollY = "500px"))
+
+```
+
+
+#### Najčešće riječi u naslovima
+```{r echo=F, eval=T, message=F , warning= FALSE}
+
+# tokenize
+dt %>% 
+  unnest_tokens(word, TITLE) -> n_token
+
+# remove stop words, numbers, single letters
+n_token %>% 
+ # anti_join(stop_corpus, by = "word") %>%
+  mutate(word = gsub("\\d+", NA, word)) %>%
+  mutate(word = gsub("^[a-zA-Z]$", NA, word)) -> n_tokenTidy
+# remove NA
+n_tokenTidy %>%
+  filter(!is.na(word)) -> n_tokenTidy
+
+setDT(n_tokenTidy)
+
+
+n_tokenTidy %>%
+  group_by(word) %>%
+  summarise(N = n()) %>%
+  arrange(desc(N)) %>%
+  filter(N > 1) %>%
+  datatable(., options = list(scrollX = TRUE, scrollY = "500px"))
+
+```
+
+
+
+```{r echo=F, eval=T, message=F , warning= FALSE}
+
+# Assuming n_tokenTidy is a data.table
+# Set up batch size (tune this based on your system's memory/capacity)
+batch_size <- 10000  # Example batch size
+total_rows <- nrow(n_tokenTidy)
+num_batches <- ceiling(total_rows / batch_size)
+
+# Function to process each batch
+process_batch <- function(batch_data, batch_number) {
+  # Convert words to lowercase
+  batch_data[, word := tolower(word)]
+  
+  # Apply the write_tokens function in a vectorized way
+  batch_data[, generalno_root := sapply(word, write_tokens)]
+  
+  # Split the strings and extract the second element
+  batch_data[, generalno_root := sapply(strsplit(generalno_root, "\t"), `[`, 2)]
+  
+  return(batch_data)
+}
+
+# Create a list of data batches
+data_batches <- split(n_tokenTidy, ceiling(seq_len(total_rows) / batch_size))
+
+# Initialize an empty list to store results
+results_list <- list()
+
+# Initialize start time for the entire process
+start_time <- Sys.time()
+
+# Process each batch sequentially with time tracking and progress
+for (i in seq_along(data_batches)) {
+  # Record the start time of the batch
+  batch_start_time <- Sys.time()
+  
+  # Process the current batch
+  results_list[[i]] <- process_batch(data_batches[[i]], i)
+  
+  # Calculate the time taken to process the batch
+  batch_end_time <- Sys.time()
+  batch_time <- batch_end_time - batch_start_time
+  
+  # Calculate total elapsed time and estimated time remaining
+  elapsed_time <- batch_end_time - start_time
+  avg_batch_time <- elapsed_time / i  # Average time per batch
+  remaining_batches <- num_batches - i
+  estimated_time_remaining <- avg_batch_time * remaining_batches
+  
+  # Print progress and time information
+  cat(sprintf("Processed batch %d of %d\n", i, num_batches))
+  cat(sprintf("Time taken for this batch: %s seconds\n", round(batch_time, 2)))
+  cat(sprintf("Estimated time remaining: %s seconds\n\n", round(estimated_time_remaining, 2)))
+}
+
+# Combine results back into a single data.table
+n_tokenTidy_processed <- rbindlist(results_list)
+
+# View the result
+head(n_tokenTidy_processed)
+
+
+
+```
+
+
+#### Najčešće riječi u naslovima (korijen)
+```{r cho=F, eval=T, message=F , warning= FALSE}
+
+# Do the same as above but keep the respective word to generalno_root
+
+n_tokenTidy_processed %>%
+  group_by(generalno_root) %>%
+  summarise(N = n(), word_list = paste(unique(word), collapse = ", ")) %>%
+  arrange(desc(N)) %>%
+  filter(N > 1) %>%
+  datatable(., options = list(scrollX = TRUE, scrollY = "500px"))
+
+
+```
+
+
+
+```{r echo=F, eval=F, message=F , warning= FALSE}
+proba <- n_tokenTidy %>% 
+  mutate(
+    word_korijen = sapply(word, function(x) {
+      result <- sapply(x, write_tokens)
+      extracted <- sapply(strsplit(result, "\t"), `[`, 2)
+      return(extracted)
+    })
+  )
+
+LilaHR <- LilaHR %>% rename("word" = "HR")
+
+proba <- CroSentilex_Gold %>%
+#  slice(1:500) %>%
+  mutate(
+    results = map(word, write_tokens),
+    korijen = map_chr(results, ~ str_extract(.x, "(?<=\t)[^\t]+$")),
+    rijec = map_chr(results, ~ str_extract(.x, "^[^\t]+(?=\t)"))
+  ) %>%
+  select(-results)
+
+
+n_tokenTidy[, transformed_column := sapply(strsplit(sapply(word, write_tokens), "\t"), `[`, 2)]
+
+
+process_batch <- function(batch) {
+  batch[, transformed_column := sapply(strsplit(sapply(word, write_tokens), "\t"), `[`, 2)]
+  return(batch)
+}
+
+# Splitting data into batches
+batch_size <- 1000  # Adjust this to the size you want
+number_of_batches <- ceiling(nrow(n_tokenTidy) / batch_size)
+batched_data <- split(n_tokenTidy, seq(1, nrow(n_tokenTidy), by=batch_size))
+
+# Applying the transformation on each batch and collecting results
+result_list <- lapply(batched_data, process_batch)
+
+# Binding batches back together
+result4 <- rbindlist(result_list)
+
+stemmed <- rbind(result, result2, result3, result4)
+
+print(result)
+
+
+
+
+proba <- readRDS("D:/LUKA/Freelance/Mediatoolkit/native_token_stemm.rds")
+
+```
+
+
+
+#### Najčešće riječi u naslovima po portalima
+```{r echo=F, eval=F, message=F , warning= FALSE, fig.height=20, fig.width=20}
+
+
+setDT(n_tokenTidy)
+an_tokenTidy <- n_tokenTidy[, .(N = .N), by = .(generalno_root, FROM)][order(-N)][N > 1]
+
+
+ggplot(an_tokenTidy, aes(reorder(generalno_root, N), N, fill = FROM)) +
+   geom_col(show.legend = FALSE) +
+   ggtitle( "") +
+   labs( x = "Riječ", y = "Number of words") +
+   facet_wrap(~ FROM, scales = "free_y") +
+   coord_flip() +
+   theme_economist()
+
+
+```
+
+#### Najčešće riječi u tekstu
+```{r echo=F, eval=F, message=F , warning= FALSE}
+
+# tokenize
+dt %>% 
+  unnest_tokens(word, FULL_TEXT) -> n_token
+
+# remove stop words, numbers, single letters
+n_token %>% 
+  anti_join(stop_corpus, by = "word") %>%
+  mutate(word = gsub("\\d+", NA, word)) %>%
+  mutate(word = gsub("^[a-zA-Z]$", NA, word)) -> n_tokenTidy
+# remove NA
+n_tokenTidy %>%
+  filter(!is.na(word)) -> n_tokenTidy
+
+setDT(n_tokenTidy)
+
+
+n_tokenTidy %>%
+  group_by(word) %>%
+  summarise(N = n()) %>%
+  arrange(desc(N)) %>%
+  filter(N > 1) %>%
+  datatable(., options = list(scrollX = TRUE, scrollY = "500px"))
+
+```
+
+#### Najčešće riječi u tekstu (korijen)
+
+```{r echo=F, eval=F, message=F , warning= FALSE}
+
+# Assuming n_tokenTidy is a data.table
+# Set up batch size (tune this based on your system's memory/capacity)
+batch_size <- 10000  # Example batch size
+total_rows <- nrow(n_tokenTidy)
+num_batches <- ceiling(total_rows / batch_size)
+
+# Function to process each batch
+process_batch <- function(batch_data, batch_number) {
+  # Convert words to lowercase
+  batch_data[, word := tolower(word)]
+  
+  # Apply the write_tokens function in a vectorized way
+  batch_data[, generalno_root := sapply(word, write_tokens)]
+  
+  # Split the strings and extract the second element
+  batch_data[, generalno_root := sapply(strsplit(generalno_root, "\t"), `[`, 2)]
+  
+  return(batch_data)
+}
+
+# Create a list of data batches
+data_batches <- split(n_tokenTidy, ceiling(seq_len(total_rows) / batch_size))
+
+# Initialize an empty list to store results
+results_list <- list()
+
+# Initialize start time for the entire process
+start_time <- Sys.time()
+
+# Process each batch sequentially with time tracking and progress
+for (i in seq_along(data_batches)) {
+  # Record the start time of the batch
+  batch_start_time <- Sys.time()
+  
+  # Process the current batch
+  results_list[[i]] <- process_batch(data_batches[[i]], i)
+  
+  # Calculate the time taken to process the batch
+  batch_end_time <- Sys.time()
+  batch_time <- batch_end_time - batch_start_time
+  
+  # Calculate total elapsed time and estimated time remaining
+  elapsed_time <- batch_end_time - start_time
+  avg_batch_time <- elapsed_time / i  # Average time per batch
+  remaining_batches <- num_batches - i
+  estimated_time_remaining <- avg_batch_time * remaining_batches
+  
+  # Print progress and time information
+  cat(sprintf("Processed batch %d of %d\n", i, num_batches))
+  cat(sprintf("Time taken for this batch: %s seconds\n", round(batch_time, 2)))
+  cat(sprintf("Estimated time remaining: %s seconds\n\n", round(estimated_time_remaining, 2)))
+}
+
+# Combine results back into a single data.table
+n_tokenTidy_processed <- rbindlist(results_list)
+
+# View the result
+head(n_tokenTidy_processed)
+
+
+
+
+```
+
+
+
+#### Najčešće riječi u tekstu (korijen)
+
+```{r echo=F, eval=F, message=F , warning= FALSE}
+
+
+# Do the same as above but keep the respective word to generalno_root
+
+n_tokenTidy_processed %>%
+  group_by(generalno_root) %>%
+  summarise(N = n(), word_list = paste(unique(word), collapse = ", ")) %>%
+  arrange(desc(N)) %>%
+  filter(N > 1) %>%
+  datatable(., options = list(scrollX = TRUE, scrollY = "500px"))
+
+
+
+
+
+```
+
+
+
+
+
+#### TF-IDF
+
+```{r echo=F, eval=F, message=F , warning= FALSE}
+n_tokenTidy_processed %>%
+  mutate(title = as.character(TITLE)) %>%  # Ensure the title is a character vector
+  mutate(row_id = dense_rank(title)) -> n_tokenTidy_processed
+
+
+term_freq <- n_tokenTidy_processed %>%
+  count(row_id, generalno_root, sort = TRUE)  # count occurrences of each word by document (FROM)
+
+# Calculate TF-IDF using the tidytext package
+tf_idf_data <- term_freq %>%
+  bind_tf_idf(generalno_root, row_id, n)  # Calculate TF-IDF
+
+# Sort by descending TF-IDF
+tf_idf_data_sorted <- tf_idf_data %>%
+  arrange(desc(n))
+
+write_xlsx(tf_idf_data, "C:/Users/lukas/Dropbox/HKS/Projekti/Dezinformacije/CatholiqDezinfo/Data/output_tf_idf.xlsx")
+
+
+
+
+
+# Convert to data.table for further manipulation (if needed)
+setDT(tf_idf_data_sorted)
+
+# View or inspect the result
+datatable(tf_idf_data_sorted, options = list(scrollX = TRUE, scrollY = "500px"))
+```
+
+
+
+
+
+
+#### Sentiment
+```{r echo=F, eval=T, message=F , warning= FALSE}
+n_tokenTidy %>%
+  anti_join(CroSentilex_Gold,by="word") %>% 
+  count(word) %>% 
+  arrange(desc(n)) %>%
+  top_n(200) %>%
+  with(wordcloud(word, n, max.words = 80)) 
+```
+
+#### Oblak riječi sa sentimentom CroSentilex 
+```{r echo=F, eval=F, message=F , warning= FALSE}
+## ComparisonCloud
+n_tokenTidy %>%
+  inner_join(CroSentilex_Gold,by="word") %>% 
+  count(word, sentiment) %>% 
+  top_n(200) %>%
+  mutate(sentiment = case_when(sentiment == 0 ~ "+/-",
+                                 sentiment == 1 ~ "-",
+                                 sentiment == 2 ~ "+")) %>%
+  acast(word ~ sentiment, value.var = "n", fill = 0) %>%
+  comparison.cloud(colors = c("firebrick3", "deepskyblue3","darkslategray"),
+                   max.words = 120)
+
+```
+
+#### Doprinos riječi sentimentu (CrosentiLex)
+```{r echo=F, eval=T, message=F , warning= FALSE, fig.height=20, fig.width=20}
+## Sentiment 
+doprinos_sentimentu <- function(dataset, no = n) {
+dataset %>%
+  inner_join(CroSentilex_Gold, by = "word") %>% 
+  count(word, sentiment,sort = TRUE) %>% 
+  group_by(sentiment) %>%
+  top_n(no) %>%
+  ungroup() %>%
+  mutate(sentiment = case_when(sentiment == 0 ~ "NEUTRAL",
+                                 sentiment == 1 ~ "NEGATIVE",
+                                 sentiment == 2 ~ "POSITIVE")) %>%
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(word, n, fill = sentiment)) +
+  geom_col(show.legend = FALSE) +
+  ggtitle( "Sentiment") +
+  labs( x = "Riječ", y = "Number of words") +
+  facet_wrap(~ sentiment, scales = "free_y") +
+  coord_flip() +
+  scale_fill_manual(values = c("grey40", "grey50","grey60")) +  # Assuming two sentiment values; adjust as needed
+  theme_minimal() + 
+  theme(
+    panel.background = element_blank(),
+    strip.background = element_blank(),
+    panel.grid = element_blank()
+  ) -> gg_doprinos_sentimentu
+  
+ gg_doprinos_sentimentu
+ 
+}
+doprinos_sentimentu(n_tokenTidy,30)
+```
+
+#### Doprinos riječi sentimentu (NRC)
+```{r echo=F, eval=T, message=F , warning= FALSE, fig.height=20, fig.width=20}
+
+NRCpn <- LilaHR_long %>% rename("word" = "korijen") %>%
+  filter(Emotion %in% c("Positive","Negative")) %>%
+  mutate(Emotion = recode(Emotion,
+                          "Positive" = "Pozitivno",
+                          "Negative" = "Negativno"))
+
+
+## Sentiment 
+doprinos_sentimentu <- function(dataset, no = n) {
+dataset %>%
+  inner_join(NRCpn, by = "word") %>% 
+  count(word, Emotion,sort = TRUE) %>% 
+  group_by(Emotion) %>%
+  top_n(no) %>%
+  ungroup() %>%
+#  mutate(sentiment = case_when(sentiment == 0 ~ "NEUTRAL",
+#                                 sentiment == 1 ~ "NEGATIVE",
+#                                 sentiment == 2 ~ "POSITIVE")) %>%
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(word, n, fill = Emotion)) +
+  geom_col(show.legend = FALSE) +
+  ggtitle( "Sentiment") +
+  labs( x = "Riječ", y = "Broj riječi") +
+  facet_wrap(~ Emotion, scales = "free_y") +
+  coord_flip() +
+  scale_fill_manual(values = c("grey40", "grey50")) +  # Assuming two sentiment values; adjust as needed
+  theme_minimal() + 
+  theme(
+    panel.background = element_blank(),
+    strip.background = element_blank(),
+    panel.grid = element_blank()
+  ) -> gg_doprinos_sentimentu
+  
+ gg_doprinos_sentimentu
+ 
+}
+
+
+doprinos_sentimentu(n_tokenTidy,20)
+```
+
+#### Doprinos riječi sentimentu (NRC)
+```{r echo=F, eval=T, message=F , warning= FALSE, fig.height=20, fig.width=20}
+NRC <- LilaHR_long %>% rename("word" = "korijen") %>%
+  filter(Emotion %in% c("Anger","Anticipation","Disgust","Fear","Joy","Sadness","Surprise","Trust")) %>%
+  mutate(Emotion = recode(Emotion,
+                          "Anger" = "Ljutnja",
+                          "Anticipation" = "Iščekivanje",
+                          "Disgust" = "Gađenje",
+                          "Fear" = "Strah",
+                          "Joy" = "Zadovoljstvo",
+                          "Sadness" = "Tuga",
+                          "Surprise" = "Iznenađenje",
+                          "Trust" = "Povjerenje"))
+
+
+## Sentiment 
+doprinos_sentimentu_full <- function(dataset, no = n) {
+dataset %>%
+  inner_join(NRC, by = "word") %>% 
+  count(word, Emotion,sort = TRUE) %>% 
+  group_by(Emotion,) %>%
+  top_n(no) %>%
+  ungroup() %>%
+#  mutate(sentiment = case_when(sentiment == 0 ~ "NEUTRAL",
+#                                 sentiment == 1 ~ "NEGATIVE",
+#                                 sentiment == 2 ~ "POSITIVE")) %>%
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(word, n, fill = Emotion)) +
+  geom_col(show.legend = FALSE) +
+  ggtitle( "Sentiment") +
+  labs( x = "Riječ", y = "Broj riječi") +
+  facet_wrap(~ Emotion, scales = "free_y") +
+  coord_flip() +
+  scale_fill_manual(values = c("grey10", "grey20","grey30","grey40","grey50","grey60","grey70","grey80")) +  # Assuming two sentiment values; adjust as needed
+  theme_minimal() + 
+  theme(
+    panel.background = element_blank(),
+    strip.background = element_blank(),
+    panel.grid = element_blank()
+  ) -> gg_doprinos_sentimentu
+  
+ gg_doprinos_sentimentu
+ 
+}
+doprinos_sentimentu_full(n_tokenTidy,20)
+```
+
+#### Bigrami
+```{r echo=F,eval=F, message=F}
+fb_bigram <- dt %>%
+  unnest_tokens(bigram, FULL_TEXT, token = "ngrams", n = 2)
+#fb_bigram %>% head(10)
+# fb_bigram %>%
+#   count(bigram, sort = T) %>%
+#   head(25) 
+fb_bigram_sep <- fb_bigram %>%
+  separate(bigram, c("word1","word2"), sep = " ")
+fb_bigram_tidy <- fb_bigram_sep %>%
+  filter(!word1 %in% stop_corpus$word) %>%
+  filter(!word2 %in% stop_corpus$word) %>%
+  mutate(word1 = gsub("\\d+", NA, word1)) %>%
+  mutate(word2 = gsub("\\d+", NA, word2)) %>%
+  mutate(word1 = gsub("^[a-zA-Z]$", NA, word1)) %>%
+  mutate(word2 = gsub("^[a-zA-Z]$", NA, word2)) 
+fb_bigram_tidy_bigram_counts <- fb_bigram_tidy %>% 
+  count(word1, word2, sort = TRUE)
+
+bigrams_united <- fb_bigram_tidy %>%
+  unite(bigram, word1, word2, sep = " ") %>%
+  filter(., !grepl("NA",bigram))
+#bigrams_united
+bigrams_united %>% 
+  count(FROM,bigram,sort = T) -> topicBigram
+
+bigrams_united %>%
+  count(bigram, sort = T) %>%
+  filter(n>10) %>%
+  datatable(., options = list(scrollX = TRUE, scrollY = "500px"))
+```
